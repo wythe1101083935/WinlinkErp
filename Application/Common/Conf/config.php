@@ -16,11 +16,9 @@ return array(
 	//'DEFAULT_FILTER'        =>  'htmlspecialchars', // 默认参数过滤方法 用于I函数...
   /*数据库配置*/
   'DB_TYPE'               =>  'mysql',  
-  'DB_HOST'               =>  'rm-bp14i6m14913604m5o.mysql.rds.aliyuncs.com',//正式服务器
   //'DB_HOST'               =>  'localhost',//测试服务器
   'DB_NAME'               =>  'wl_ffl',
   'DB_USER'               =>  'winlink',   
-  'DB_PWD'                =>  'Xuzhonghai00',
   //'DB_PWD'                =>  '123456',
   'DB_PORT'               =>  '3306', 
   'DB_PREFIX'             =>  'crm_', 
