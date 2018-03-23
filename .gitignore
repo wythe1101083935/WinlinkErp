@@ -1,4 +1,8 @@
 .svn/*
 /Application/Runtime/
-
+configure.conf
+data.txt
+error.txt
+robots.txt
+SoapClient.exe
 
