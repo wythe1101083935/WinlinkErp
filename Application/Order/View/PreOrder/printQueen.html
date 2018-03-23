@@ -1,0 +1,35 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<div style="margin-top:10px;margin-left:10%;margin-right:10%;">
+
+	<div>
+		<table class="layui-table" lay-size="lg">
+		  <colgroup>
+		    <col width="20%">
+		    <col width="80%">
+		  </colgroup>
+			<thead>
+				<th>单号</th>
+				<th>下载地址</th>
+			</thead>
+			<tbody>
+			  	<foreach name="links" item="vo" key="names">
+		      		<tr>
+		      			<td rowspan='{$vo|count}'>{$names}</td>
+			      	<foreach name="vo" item="id" key="key">
+			      		<if condition="$key eq 0">
+							<td><a href="{$id}" target="_blank">{$id}</a></td></tr>
+						<else />
+				      		<tr>
+						    	<td><a href="{$id}" target="_blank">{$id}</a></td>
+							</tr>						
+			      		</if>
+					</foreach>
+				</foreach>			
+			</tbody>
+		</table>
+	</div>    
+</div>
+</block>
+<block name="baseScript">
+</block>

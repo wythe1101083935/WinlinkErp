@@ -1,0 +1,342 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">输入manifest信息</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="uploadAwb">上传订单</a></li>    
+      <li class="layui-nav-item"><a href="javascript:;" id="uploadV">推送</a></li>    
+    </ul>   
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="responseDetail" >返回详情</a></li>      
+      <li class="layui-nav-item"><a href="javascript:;" id="clearInfo" >清空</a></li>      
+    </ul> 
+   <input type="file" name="xlfile" id="xlf" style="display:none;"/>
+</block>
+<block name="baseAdvancedSearch">
+        <div class="layui-form-item">
+          <label class="layui-form-label">Hub</label>
+          <div class="layui-input-block">
+              <input type="radio" name="Hub" value="Y" title="Hub">
+              <input type="radio" name="Hub" value="N" title="Non Hub" checked>              
+          </div>            
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">Manifest No</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field layui-disabled" name="txtmanifest" disabled="">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">Carrier</label>
+            <div class="layui-input-inline">
+              <select  name="CarrierCode" lay-verify="required">
+                <option selected="selected" value="">Please select</option>
+                <option value="CARR44">POSTAPLUS</option>
+                <option value="CARR65">Cathay Pacific Airways</option>
+                <option value="CARR64">Qatar Airways</option>
+                <option value="CARR45">DHL Aero Expreso</option>                
+              </select>
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label" title="Carrier Name">Name</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field layui-disabled" name="txtcarriercode" disabled="">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label" title="From Station">From</label>
+            <div class="layui-input-inline">
+              <input type="text" name="FromStation" class="layui-input field" disabled="" value="CHN">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label" title="To Station">To</label>
+            <div class="layui-input-inline">
+              <select name="ToStation" lay-verify="required" lay-search="">
+                  <option selected="selected" value="">Please select</option>
+                  <option value="QAT">QATAR</option>
+                  <option value="USA2">NEW</option>
+                  <option value="CAI">EGYPT</option>
+                  <option value="GSO">GSO</option>
+                  <option value="MCT">MUSCAT</option>
+                  <option value="KWI">KUWAIT</option>
+                  <option value="DXB">DUBAI</option>
+                  <option value="BHR">BAHRAIN</option>
+                  <option value="CHN">CHINA</option>
+                  <option value="CAN">CANADA</option>
+                  <option value="GBR">UNITED KINGDOM</option>
+                  <option value="USA">UNITED STATES</option>
+                  <option value="NA">Unknown</option>                
+              </select>
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">Load Type</label>
+            <div class="layui-input-inline">
+                <select name="LoadType" lay-verify="required">
+                    <option value="">--Select--</option>
+                    <option value="DG">DG</option>
+                    <option value="NonDoc">Non-Documents</option>
+                    <option value="Doc">Documents</option>
+                    <option value="ND/D">Documents / Non-Documents</option>
+                </select>
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label" title="Shipping Mode">Mode</label>
+            <div class="layui-input-inline">
+                <select name="ShippingMode" lay-verify="required">
+                    <option value="">--Select--</option>
+                    <option value="CBV">CBV</option>
+                    <option value="Freight">Freight</option>
+                </select>
+            </div>
+          </div>  
+          <div class="layui-inline">
+            <label class="layui-form-label">Flight 1</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="Flight1" lay-verify="required">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">Flight 2</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="Flight2" lay-verify="required">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">Remarks</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="Remarks" lay-verify="required">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">MAWB No</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="MAWB" lay-verify="required|mawbno">
+            </div>
+          </div>   
+          <div class="layui-inline">
+            <label class="layui-form-label" title="Departure Date">Dep Date</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="DeptDate" id="date3" lay-verify="required|date">
+            </div>
+          </div>  
+          <div class="layui-inline">
+            <label class="layui-form-label" title="Expected Arrival Date">Expe Date</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="ExpectedDate" id="date1" lay-verify="required|date">
+            </div>
+          </div>  
+          <!-- <div class="layui-inline">
+            <label class="layui-form-label" title="Actual Arrived Date">Arri Date</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="txtarrivaldate" id="date2">
+            </div>
+          </div>  -->
+          <div class="layui-inline">
+            <label class="layui-form-label">No Of Bags</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="NumberOfBags" lay-verify="required|number">
+            </div>
+          </div>   
+          <!-- <div class="layui-inline">
+            <label class="layui-form-label" title="Bag No/Serial No">Bag No</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="txtnoofbags">
+            </div>
+          </div> 
+          <div class="layui-inline">
+            <label class="layui-form-label">HAWB No</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="txthawbno">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label" title="Consolidate Bag Serial">Bag Serial</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="txtconsobag">
+            </div>
+          </div> -->
+          <div class="layui-inline">
+            <label class="layui-form-label">Total Weight</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input field" name="Weight" lay-verify="required|number">
+            </div>
+          </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+              <input type="button" lay-submit lay-filter="baseForm" id="uploadV1" class="layui-btn" value="推送">
+              <input type="reset"  class="layui-btn" value="重置">
+            </div>
+        </div>
+</block>
+<block name="baseFields">
+  <th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+  <th data-field="Airwaybill" data-width="100" data-align="center">HAWB No</th>
+  <th data-field="BagSerial" data-width="100" data-align="center">Bag Serial</th>
+  <th data-field="status" data-formatter="statusFormatter" data-align="center" data-visible="false">请求</th>
+  <th data-field="msg" data-align="center" data-align="center" data-visible="false">Response</th>
+  <th data-field="ManifestNo" data-align="center" data-align="center" data-visible="false">ManifestNo</th>
+</block>
+<block name="baseScript">
+<script>
+Array.prototype.notempty = function(){
+    return this.filter(t => t!=undefined && t!==null && t!='');
+}
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element','code'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#date2',type:'date',theme:'#393D49'});
+    laydate.render({elem:'#date1',type:'date',theme:'#393D49'});
+    laydate.render({elem:'#date3',type:'date',theme:'#393D49'});
+    $('#clearInfo').click(function(){
+      $('#DataTable').bootstrapTable('removeAll');
+    });
+    $('#uploadAwb').click(function(){
+      $('#xlf').click();
+    });
+    /*input数据写入localstorage*/
+    $('.field').blur(function(){
+      var formData = {};
+      if(window.localStorage.Manifest_formData){
+        formData = JSON.parse(window.localStorage.Manifest_formData);
+      }
+      var key = $(this).attr('name');
+      var value = $(this).val();
+      formData[key] = value;
+      window.localStorage.Manifest_formData = JSON.stringify(formData);      
+    })
+    /*下拉列表写入localStorage*/
+    form.on('select()',function(data){
+      var formData = {};
+      if(window.localStorage.Manifest_formData){
+        formData = JSON.parse(window.localStorage.Manifest_formData);
+      }
+      var key = $(data.elem).attr('name');
+      var value = data.value;
+      formData[key] = value;
+      window.localStorage.Manifest_formData = JSON.stringify(formData);
+    })
+    /*特殊*/
+    $('[name="NumberOfBags"]').focus(function(){
+      if(window.localStorage.upload_posta_data){
+        $(this).val(JSON.parse(window.localStorage.upload_posta_data).length);
+      }
+    });
+    /*自定义表单验证*/
+    form.verify({
+      mawbno:[/^[a-zA-Z0-9]*$/,'MAWB No不能包含特殊字符！'] 
+    });      
+    form.on('submit(baseForm)',function(){
+      $('#advancedSearch').slideUp(300);
+      if(!window.localStorage.upload_posta_data){
+        layer.msg('尚未上传订单数据！');
+        return ;
+      }
+      var uploadData = JSON.parse(window.localStorage.upload_posta_data);
+      var $number = uploadData.length;
+      var formDataTmp = $('#baseForm').serializeArray();
+      var formData = {};
+      for (var i = 0; i < formDataTmp.length; i++) {
+        formData[formDataTmp[i].name] = formDataTmp[i].value;
+      }
+      formData.weight = $number;
+      var index = layer.load(2,loadStyle);
+      $.ajax({
+        url:'__TRACKER__/PostaTrackerUpload/pushManifest',
+        type:'post',
+        async:true,
+        dataType:'json',
+        data:{headerData:formData,bodyData:uploadData},
+        success:function(res){
+          //console.log(res);
+          window.localStorage.responseDetailCode  = JSON.stringify(res.code,null,4);
+          layer.close(index);
+          $('#DataTable').bootstrapTable('removeAll');
+          XHRTable([{"ManifestNo":res.data,"status":res.status,"msg":res.msg}]);
+          hideColumn();
+        }
+      });
+      return false;
+    });
+    $('#uploadV').click(function(){
+      $('#uploadV1').click();
+    });
+    $('#responseDetail').click(function(){
+      if(!window.localStorage.responseDetailCode){
+        layer.msg('没有返回代码！');
+        return ;
+      }
+      var msg = window.localStorage.responseDetailCode;
+      msg.replace(/\n/g, '<br>').replace(/\s/g, ' ');  
+      layer.open({
+        type:1,
+        area:['100%','100%'],
+        content:'<pre class="layui-code" lay-title="" lay-height="" lay-skin="" lay-encode="">'+msg+'</pre>'
+      })
+    });
+    hideColumn();
+    /*如果存在数据，赋值给表单*/
+    if(!window.localStorage.Manifest_formData){ 
+    }else{
+      var formData = JSON.parse(window.localStorage.Manifest_formData);
+      for(var i in formData){
+        $('[name="'+i+'"]').val(formData[i]);
+      }
+      form.render();
+    }
+});
+</script>
+</block>
+<block name="baseFunction">
+<include file="./Public/view/uploadIndexTable.html" uploaddataname="upload_posta_data" />
+<script>
+function showColumn(){
+  $('#DataTable').bootstrapTable('hideColumn','ManifestNo');
+  $('#DataTable').bootstrapTable('hideColumn','status');
+  $('#DataTable').bootstrapTable('hideColumn','msg');
+  $('#DataTable').bootstrapTable('showColumn','BagSerial');
+  $('#DataTable').bootstrapTable('showColumn','Airwaybill');
+}
+function hideColumn(){
+  $('#DataTable').bootstrapTable('hideColumn','BagSerial');
+  $('#DataTable').bootstrapTable('hideColumn','Airwaybill');
+  $('#DataTable').bootstrapTable('showColumn','ManifestNo');
+  $('#DataTable').bootstrapTable('showColumn','status');
+  $('#DataTable').bootstrapTable('showColumn','msg');
+}
+</script>
+<script>
+var indexLoad = '';
+function statusFormatter(_value){
+  return _value ? '<font class="text-success">成功！</font>':'<font style="color:#FF5722;">失败！</font>'
+}
+function XHRTable($data=false){
+  indexLoad = layer.load(2,loadStyle);
+  var initParam = {
+            height: getHeight(),
+            pagination: true,
+            pageList: [25,50,100], 
+            onResetView:function(){
+              layer.close(indexLoad);             
+            },
+            formatNoMatches: function(){
+               return '拖入此处上传！';
+            }
+  };
+  if($data){
+    initParam.data = $data;
+  }
+  console.log($data);
+  $("#DataTable").bootstrapTable('destroy').bootstrapTable(initParam);
+}
+</script>
+</block>

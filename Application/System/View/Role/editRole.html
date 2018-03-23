@@ -1,0 +1,70 @@
+<extend name="./Public/view/form.html" />
+<block name="baseTitile">修改角色</block>
+<block name="baseForm">
+  <div class="layui-form-item">
+    <label class="layui-form-label">角色名</label>
+    <div class="layui-input-inline" style="width:400px;">
+      <input type="text" class="layui-input roleName" lay-verify="required" placeholder="请输入角色名称" value="{$nowRole.name}">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">开关</label>
+    <div class="layui-input-block">
+      <input type="checkbox" name="switch" class="roleStatus" lay-skin="switch" value="1" lay-text="启用|禁用" <eq name="nowRole.status" value="1">checked</eq>>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">详情描述</label>
+    <div class="layui-input-block">
+      <textarea placeholder="请输入详请描述" class="layui-textarea roleRemarks">{$nowRole.remarks}</textarea>
+    </div>
+  </div>
+    
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit="" lay-filter="editGoods">立即提交</button>
+      </div>
+  </div>
+</block>
+<block name="baseScript">
+<script>
+var role_id = {$Think.get.id};
+layui.use(['form','layer','jquery'],function(){
+  var form = layui.form,
+    layer = layui.layer,
+    $ = layui.jquery;
+  /*监听表单提交*/
+  form.on("submit(editGoods)",function(data){
+    //弹出loading
+      var index = layer.load(2,loadStyle);      
+      setTimeout(function()
+      {
+        $.ajax({
+          url:'__SYSTEM__/Role/updateRole',
+          type:'post',
+          data:{
+          	id:role_id,
+            name:$('.roleName').val(),
+            status:$('.roleStatus').val(),
+            remarks:$('.roleRemarks').val()
+          },
+          success:function(res){
+            if(res.status){     
+              layer.close(index);
+              layer.msg(res.msg);
+              setTimeout(function(){
+                parent.location.reload();
+              },500);
+            }else{
+                layer.close(index);
+                layer.msg(res.msg);          
+            }   
+          }
+        });
+      },500);
+      return false;
+  })
+
+})
+</script>
+</block>

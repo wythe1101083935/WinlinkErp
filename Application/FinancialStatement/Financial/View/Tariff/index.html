@@ -1,0 +1,151 @@
+<extend name="./Public/view/indexTablelayui.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="search1">刷新</a></li>
+    </ul> 
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >刷新</a></li>
+    </ul>  
+</block>
+<block name="baseScript">
+<script>
+layui.use(['table','element'],function(){
+  var table = layui.table
+      ,element = layui.element
+      ,$ = layui.jquery;
+
+  table.on('edit(DataTable)', function(obj){
+    var value = obj.value //得到修改后的值
+    ,data = obj.data //得到所在行所有键值
+    ,field = obj.field; //得到字段
+    //console.log(obj);
+    var id = '',type = '',name='';
+    if(field == 'value1'){
+      id = data.id1;
+      name = data.name1;
+      type = 'rate';
+    }else if(field == 'value2'){
+      id = data.id2;
+      name = data.name2;
+      type = 'tariff';
+    }else if(field == 'value3'){
+      id = data.id3;
+      name = data.name3;
+      type = 'tariff';
+    }
+    $.ajax({
+      url:'__FINANCIAL__/Tariff/update',
+      type:'post',
+      data:{id:id,type:type,value:value},
+      success:function(res){
+        if(res.status){
+          layer.msg(name+res.msg);
+        }
+      }
+    });
+  });
+$('#search,#search1').click(function(){
+  XHRTable();
+});
+$(document).ready(function(){
+  XHRTable();
+});
+function XHRTable(){
+  table.render({
+    elem:'#DataTable',
+    where:{
+      keyword:$('#keyword').val()
+    },
+    cols:[
+             [
+                 {
+                     title: "汇率",
+                     valign:"middle",
+                     align:"center",
+                     colspan: 3,
+                     rowspan: 1
+                 },
+                 {
+                     title: "阿联酋关税",
+                     valign:"middle",
+                     align:"center",
+                     colspan: 3,
+                     rowspan: 1
+                 },
+                 {
+                     title: "沙特关税",
+                     valign:"middle",
+                     align:"center",
+                     colspan: 3,
+                     rowspan: 1
+                 },
+             ],
+             [
+                 {
+                         field: 'id1',
+                         formatter:'indexFormatter',
+                         title:'序号',
+                         valign:"middle",
+                         align:"center",                 
+                 },
+                 {
+                         field: 'name1',
+                         title: "币种",
+                         valign:"middle",
+                         align:"center",                 
+                 },
+                 {
+                         field: 'value1',
+                         title: "汇率",
+                         valign:"middle",
+                         edit: 'text',
+                         align:"center",                 
+                 },
+                 {
+                         field: 'id2',
+                         formatter:'indexFormatter',
+                         title:'序号',
+                         valign:"middle",
+                         align:"center",                 
+                 },
+                 {
+                         field: 'name2',
+                         title: "常数名",
+                         valign:"middle",
+                         align:"center",                 
+                 },
+                 {
+                         field: 'value2',
+                         title: "常数值",
+                         valign:"middle",
+                         edit: 'text',
+                         align:"center",                 
+                 },
+                 {
+                         field: 'id3',
+                         formatter:'indexFormatter',
+                         title:'序号',
+                         valign:"middle",
+                         align:"center",                 
+                 },
+                 {
+                         field: 'name3',
+                         title: "常数名",
+                         valign:"middle",
+                         align:"center",                 
+                 },
+                 {
+                         field: 'value3',
+                         title: "常数值",
+                         valign:"middle",
+                         edit: 'text',
+                         align:"center",                 
+                 },
+             ]
+         ],
+    url:'__FINANCIAL__/Tariff/XHRIndex'
+  });  
+}
+});
+</script>
+</block>

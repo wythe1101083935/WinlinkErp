@@ -1,0 +1,485 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+<style>
+  a{
+
+  }
+</style>
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+     <!--  <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li> -->
+    </ul>
+    <ul class="layui-nav layui-layout-right">
+     <!--  <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li> -->
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+</block>
+<block name="baseScript">
+<script>
+function checkEmpty(value,name){
+  if(!value){
+    return {status:false,msg:name+'不能为空'}
+  }else{
+    return {status:true}
+  }
+}
+function checkInt(value,name){
+  var preg = /^[0-9]*$/;
+  if(!preg.test(value)){
+    return {status:false,msg:name+'只能为整数'}
+  }else{
+    return {status:true}
+  }
+}
+function checkNumber(value,name){
+  var preg = /^[0-9.]*$/;
+  if(!preg.test(value)){
+    return {status:false,msg:name+'只能为数字'}
+  }else{
+    return {status:true}
+  }
+}
+function checkSpecialChar(value,name){
+  var preg = /^[0-9a-zA-Z]*$/;
+  if(!preg.test(value)){
+    return {status:false,msg:name+'不能含有特殊字符'}
+  }else{
+    return {status:true}
+  }
+}
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+});
+</script>
+</block>
+<block name="baseFunction">
+<link href="__PUBLIC__/css/bootstrap-editable.min.css" rel="stylesheet">
+<style>
+  .editable-click, a.editable-click, a.editable-click:hover {
+    text-decoration: none;
+    border-bottom: dashed 0px #08c;
+}
+</style>
+<script src="__PUBLIC__/js/bootstrap-editable.min.js"></script>
+<script src="__PUBLIC__/js/bootstrap-table-editable.min.js"></script>
+<script>
+var indexLoad = '';
+function XHRTable(){
+    var columns = [
+             [
+                 {
+                         field: 'flight_info_id',
+                         title:'ID',
+                         valign:"middle",
+                         formatter:indexFormatter,                       
+                         align:"center",
+                         width:'40'            
+                 },
+                 {
+                         field: 'flight_info_date',
+                         title:'日期',
+                         sortable:true,
+                         valign:"middle",
+                         formatter:timeFormatter,                       
+                         align:"center",
+                         width:'110',
+                         editable:{
+                          type:'date',
+                          title:"时间"
+                         },             
+                 },
+                 {
+                         field: 'flight_info_awbno',
+                         title:'运单号',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'运单号',
+                          validate:function(v){
+                            var check = checkEmpty(v,'运单号');
+                            if(!check.status) return check.msg;                    
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_pcs',
+                         title:'件数',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'件数',
+                          validate:function(v){
+                            var check = checkEmpty(v,'件数');
+                            if(!check.status) return check.msg;
+                            var check = checkInt(v,'件数');
+                            if(!check.status) return check.msg;                       
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_weight',
+                         title:'重量',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'重量',
+                          validate:function(v){
+                            var check = checkEmpty(v,'重量');
+                            if(!check.status) return check.msg;
+                            var check = checkNumber(v,'重量');
+                            if(!check.status) return check.msg;                       
+                          }
+                         }              
+                 },
+                 {
+                         field: 'flight_info_volume',
+                         title:'体积',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'体积',
+                          validate:function(v){
+                            var check = checkEmpty(v,'体积');
+                            if(!check.status) return check.msg;
+                            var check = checkNumber(v,'体积');
+                            if(!check.status) return check.msg;                       
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_destination',
+                         title:'目的地',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'目的地',
+                          validate:function(v){
+                            var check = checkEmpty(v,'目的地');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_mawb',
+                         title:'提单号',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'提单号',
+                          validate:function(v){
+                            var check = checkEmpty(v,'提单号');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_agent',
+                         title:'空运代理',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'空运代理',
+                          validate:function(v){
+                            var check = checkEmpty(v,'空运代理');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_customer_code',
+                         title:'客户代码',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'客户代码',
+                          validate:function(v){
+                            var check = checkEmpty(v,'客户代码');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_hk_warehouse',
+                         title:'中港/入仓',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'中港/入仓',
+                          validate:function(v){
+                            var check = checkEmpty(v,'中港/入仓');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_ship_type',
+                         templet:'#shipTypeFormatter',
+                         title:'运输方式',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'运输方式',
+                          validate:function(v){
+                            var check = checkEmpty(v,'运输方式');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }               
+                 },
+                 {
+                         field: 'flight_info_goods_nature',
+                         title:'货物性质',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'货物性质',
+                          validate:function(v){
+                            var check = checkEmpty(v,'货物性质');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_loading',
+                         title:'装车',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'装车',
+                          validate:function(v){
+                            var check = checkEmpty(v,'装车');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_delivery',
+                         title:'派送',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'派送',
+                          validate:function(v){
+                            var check = checkEmpty(v,'派送');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_mounting_board',
+                         title:'装板',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'装板',
+                          validate:function(v){
+                            var check = checkEmpty(v,'装板');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_airport',
+                         title:'航班',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'航班',
+                          validate:function(v){
+                            var check = checkEmpty(v,'航班');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_mawb_weight',
+                         title:'提单重',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'提单重',
+                          validate:function(v){
+                            var check = checkEmpty(v,'提单重');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_mawb_vweight',
+                         title:'体积重',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'体积重',
+                          validate:function(v){
+                            var check = checkEmpty(v,'体积重');
+                            if(!check.status) return check.msg;                     
+                          }
+                         }                
+                 },
+                 {
+                         field: 'flight_info_remark',
+                         title:'现况',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100',
+                         editable:{
+                          type:'text',
+                          title:'现况'
+                         }                
+                 },
+                 {
+                         field: 'create_user_name',
+                         title:'创建人',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100'            
+                 },
+                 {
+                         field: 'create_time',
+                         title:'创建时间',
+                         valign:"middle",
+                         formatter:timeFormatter,
+                         align:"center",
+                         width:'110'            
+                 },
+                 {
+                         field: 'update_user_name',
+                         title:'更新人',
+                         valign:"middle",
+                         formatter:emptyFormatter,
+                         align:"center",
+                         width:'100'             
+                 },
+                 {
+                         field: 'update_time',
+                         title:'更新时间',
+                         valign:"middle",
+                         formatter:timeFormatter,
+                         align:"center",
+                         width:'110'                
+                 },
+             ]
+         ];
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__DISPATCHTOFOREIGN__/FlightInfo/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table',
+          columns:columns,
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'flight_info_date',
+                  awbno:$('#awbno').val(),
+                  timeOut:$('#timeOut').val(),
+                  timeFinish:$('#timeFinish').val(),
+                  username:$('#username').val(),
+                  country:$('#country').val()
+              };
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          },
+          onEditableSave: function (field, row, oldValue, $el){
+              $.ajax({
+                  type: "post",
+                  url: "__DISPATCHTOFOREIGN__/FlightInfo/update",
+                  data:{flight_info_id:row.flight_info_id,field:field,value:row[field]},
+                  dataType: 'JSON',
+                  success: function (res) {
+                      if(!res.status){
+                          layer.msg(res.msg);
+                      }
+                      if(field=='flight_info_date' && res.status && res.data){
+                          XHRTable();
+                      }                     
+                  }
+              });
+          }
+      });     
+}
+</script>
+</block>

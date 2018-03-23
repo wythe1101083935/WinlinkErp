@@ -1,0 +1,368 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">订单状态</a>
+        <dl class="layui-nav-child">
+          <foreach name="orderStatus" item="val">
+            <dd data-action="{$val.action}" data-range="{$val.range}" class="orderStatus"><a href="javascript:;">{$val.statusName}</a></dd>
+          </foreach> 
+        </dl>        
+      </li>
+      <li class="layui-nav-item">
+         <a href="javascript:;">操作</a>
+         <dl class="layui-nav-child">
+           <dd id="confirm"><a href="javascript:;">Confirm</a></dd>
+           <dd id="printInvoice"><a href="javascript:;">Print Invoice</a></dd>
+           <dd id="printSingle"><a href="javascript:;">Print Single</a></dd>
+           <dd id="printBill"><a href="javascript:;">Print Bill</a></dd>
+         </dl>
+      </li>
+    </ul> 
+    <form class="layui-layout-left layui-form" style="padding:10px;left:300px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <div class="layui-input-inline">
+                <select name="modules" id="noType" lay-search="">
+                    <option value="awbno">AWBNO</option>
+                    <option value="userRefId">userRef</option>
+                    <option value="ShipperRef">17NO</option>
+                    <option value="RefCode">转单号</option>
+                </select>                
+          </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入单号" id="awbnos" class="layui-textarea quickSearch" style="min-height:40px;height:40px;max-height:40px;"></textarea>
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+        <div class="layui-form-item">  
+            <div class="layui-inline">
+              <label class="layui-form-label">Time(C)</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input" id="timeCreate" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">SEType</label>
+                <div class="layui-input-inline">
+                    <select name="modules" id="serviceType" lay-search="">
+                        <option value="0">所有</option>
+                        <option value="NOR">预付</option>
+                        <option value="NCND">到付</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Country</label>
+                <div class="layui-input-inline">
+                    <select name="modules" id="country" lay-search="">
+                        <option value="0">所有</option>
+                        <option value="SA">沙特</option>
+                        <option value="OM">阿曼</option>
+                        <option value="AE">阿联酋(旧)</option>
+                        <option value="AE1">阿联酋</option>
+                        <option value="AE2">阿联酋(偏远)</option>
+                        <option value="BH">巴林</option>
+                        <option value="EG">埃及</option>
+                        <option value="QA">卡塔尔</option>
+                        <option value="IR">伊朗</option>
+                        <option value="KWT">科威特</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">SName</label>
+              <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="shipperName">
+              </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                    <input type="button" class="layui-btn" id="search1" value="查询"/>
+                    <input type="reset" class="layui-btn" id="" value="重置"/>
+            </div>
+        </div>     
+</block>
+<block name="baseFields">
+        <th data-field="state" data-width="40" data-checkbox="true"></th>
+        <th data-field="Index" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+        <th data-field="awbno" data-width="110" data-align="center" data-formatter="awbDetailFormatter" data-sortable="true">AWBNo</th>
+        <th data-field="is_confirm" data-width="100" data-align="center" data-formatter="confirmFormatter">Confirmed</th>
+        <th data-field="billdate" data-width="100" data-align="center" data-formatter="timeFormatter" data-sortable="true">Time</th>
+        <th data-field="consigneename" data-align="center" data-width="100">RECIVER</th>
+        <th data-field="consigneeaddress1" data-align="center" data-width="200" >RECIVER ADDRESS</th>      
+        <th data-field="consigneephone" data-align="center" data-width="140">TEL NOS</th>
+        <th data-field="destination" data-align="center" data-width="100">CITY CODE</th>
+        <th data-field="noofpieces" data-align="center" data-width="40">Pcs</th>
+        <th data-field="weight" data-align="center" data-width="50">Weight</th>
+        <th data-field="servicetype" data-align="center" data-width="100">ServiceType</th>
+        <th data-field="refcode" data-align="center" data-width="115">RefCode</th>
+        <th data-field="shipperref" data-align="center" data-width="170">RefNumber</th>
+        <th data-field="userrefid" data-align="center" data-width="150">UserRef</th>
+        <th data-field="consigneecountry" data-align="center" data-width="100" data-formatter="countryFormatter">Country</th>
+        <th data-field="consigneecity" data-align="center" data-width="100">City</th>
+        <th data-field="inamt" data-align="center" data-width="100">NcndAmt</th>                                   
+        <th data-field="shippername" data-align="center" data-width="100">ShipperName</th>   
+</block>
+<block name="baseScript">
+<script src="__PUBLIC__/print/pdfmake.js"></script>
+<script src="__PUBLIC__/print/vfs_fonts.js"></script>
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+  laydate.render({elem:'#timeCreate',type:'datetime',range:'~',theme:'#393D49'});
+  $('#confirm').click(function(){
+    var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+    if(selectedRows.length < 1){
+        layer.msg('请选择至少一个订单！');
+        return false;
+    }
+    var awbnos  = [];
+    for (var i = 0; i < selectedRows.length; i++) {
+      awbnos[awbnos.length] = selectedRows[i].awbno
+    }
+    $.ajax({
+      url:'__ORDER__/PreOrder/confirm',
+      type:'post',
+      data:{awbnos:awbnos},
+      success:function(res){
+        layer.msg(res.msg);
+        if(res.status){
+          XHRTable();
+        }
+      }
+    });
+  });
+  $('#printInvoice').click(function(){
+    var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+    if(selectedRows.length < 1){
+      layer.msg('尚未选中订单！');
+      return;
+    }
+    var awbno = [];
+    for( var row in selectedRows) {
+        awbno.push(selectedRows[row]['awbno']);
+    }
+    var postString = awbno.join(',');
+   var url = '__ORDER__/PreOrder/printQueen?awbno='+postString;  
+   parent.Win10.openUrl(url,'打印链接');  
+  });
+  $('#printBill').click(function(){
+    var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+    if(selectedRows.length != 1){
+        layer.msg('请选中一个面单打印发票！');
+        return;
+    }  
+    var orderInfo = {};
+    $.ajax({
+        url:'__ORDER__/PreOrder/getOrderinfo',
+        type:'post',
+        async:false,
+        data:{awbno:selectedRows[0].awbno},
+        dataType:'json',
+        success:function(res){
+            //console.log(res);
+            if(res.status){
+                orderInfo = res.data;
+            }else{
+                layer.msg(res.msg);
+                return;
+            }
+        }
+    }); 
+    pdfMake.fonts = {
+        avcd: {
+            normal: 'simpo.ttf',
+            bold: 'simpbdo.ttf',
+            italics: 'simpo.ttf',
+            bolditalics: 'simpo.ttf',
+        }
+    };
+    var Invoice = {
+        content:[
+            {text:'COMMERCIAL INVOICE',style:'header'},
+            {text:' ',style:'header'},
+            {
+                sytle:'tableExample',
+                table:{
+                    widths:[100,100,100,100,100],
+                    heights:[40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,'auto'],
+                    body:[
+                        [
+                            {text:'CONSIGNEE:'+orderInfo.awbnoInfo.consigneename,colSpan:3,style:'tableFont'},'','',{text:'AIR WAYBILL NO:'+orderInfo.awbnoInfo.awbno,colSpan:2,style:'tableFont'},''
+                        ],
+                        [
+                            {text:'Address:'+orderInfo.awbnoInfo.consigneeaddress1,rowSpan:3,colSpan:3,style:'tableFont'},'','',{text:'INVOICE NO:',colSpan:2,style:'tableFont'},''
+                        ],
+                        [
+                            '','','',{text:'FROM: GUANGZHOU VIA HONGKONG CHINA  ',colSpan:2,style:'tableFont'},''
+                        ],
+                        [
+                            '','','',{text:'INVOICE DATE:'+orderInfo.awbnoInfo.stringTime,colSpan:2,style:'tableFont'},''
+                        ],
+                        [
+                            {text:'DESCRIPTION',style:'textFont'},{text:'HS_CODE',style:'textFont'},{text:'QTY (PCS)',style:'textFont'},{text:'UNIT PRICE (USD)',style:'textFont'},{text:'TOTAL (USD)',style:'textFont'}
+                        ]                 
+                    ]
+                }
+            }
+        ],
+        styles: {
+            header: {
+                fontSize: 22,
+                bold: true,
+                margin: [40, 0, 0, 10],
+                alignment:'center'
+            },
+            tableExample: {
+                margin: [0, 5, 0, 15]
+            },
+            tableFont:{
+                bold:true,
+                fontSize:10,
+                color:'black'
+            },
+            textFont:{
+                bold:true,
+                fontSize:10,
+                color:'black',
+                alignment:'center'
+            },
+            textInvoice:{
+                bold:false,
+                fontSize:10,
+                color:'black',
+                alignment:'center'
+            }
+        },
+        defaultStyle: {
+            font:'avcd'
+            // alignment: 'justify'
+        }
+    };
+    for (var i = 0; i < orderInfo.awbnoInvoice.length; i++) {
+        var invoiceDetail = [{text:orderInfo.awbnoInvoice[i].ordername,style:'textInvoice'},{text:orderInfo.awbnoInvoice[i].orderhscod,style:'textInvoice'},{text:orderInfo.awbnoInvoice[i].orderpcs,style:'textInvoice'},{text:orderInfo.awbnoInvoice[i].orderinsvalue,style:'textInvoice'},{text:orderInfo.awbnoInvoice[i].orderinsvalue,style:'textInvoice'}];
+       Invoice.content[2].table.body.push(invoiceDetail);
+    }
+    if(i<5){
+        for (var j = 0; j < (5-i); j++) {
+            var invoiceDetail = ['','','','',''];
+            Invoice.content[2].table.body.push(invoiceDetail);
+        }
+    }
+    pdfMake.createPdf(Invoice)._openPdf();    
+  });
+  $('#printSingle').click(function(){
+    var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+    if(selectedRows.length < 1){
+      layer.msg('尚未选中订单！');
+      return;
+    }
+    var awbno = [];
+    for (var i = 0; i < selectedRows.length; i++) {
+      awbno[awbno.length] = selectedRows[i].awbno
+    }
+    var postString = awbno.join(',');
+    var index = layer.load(2,loadStyle);
+    $.post('http://v2.winlinklogistics.com/index.php/PostZone/printPdf', {idList: postString}, function(data, textStatus, xhr) {
+        if (data.status){
+            layer.close(index);
+            window.open(data.url);
+        }
+    }, "JSON");
+  });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+function confirmFormatter(_val) {
+    return _val == '0' ? 'unconfirmed' : 'confirmed';
+}
+function countryFormatter(_val) {
+    return _val.toUpperCase();
+}
+function awbDetailFormatter(_val){
+    return '<a style="display:block;width:100%;height:100%" onclick="showPage(this,\'订单详情\')" data-href="__ORDER__/PreOrder/orderDetail?awbno=' + _val + '" target="_blank">' + _val + '</a>';
+}
+function showPage(_link,title='订单轨迹'){
+    var index = layer.open({
+        type: 2,
+        title:'<b>'+$(_link).text()+'</b>'+title,
+        content: $(_link).data('href'),
+        area: ['100%', '100%']
+    });
+}
+var indexLoad = '';
+function XHRTable(selectTime = false, status = false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__ORDER__/PreOrder/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'billdate',   
+                  timeCreate:$('#timeCreate').val(),
+                  serviceType:$('#serviceType').val(),
+                  country:$('#country').val(),
+                  shipperName:$('#shipperName').val(),
+                  noType:$('#noType').val(),
+                  orderNos:$('#awbnos').val()
+              };
+              if(selectTime){
+                param.timeOut = selectTime;
+              }
+              if(status){
+                param.orderStatus = status;
+              }
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

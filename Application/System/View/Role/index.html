@@ -1,0 +1,194 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="roleAdd">新增</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="roleEdit">编辑</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="roleAuth">编辑角色权限</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="roleDelete">删除</a></li>
+    </ul> 
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部<a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页<a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+ 
+</block>
+<block name="baseFields">
+    <th class="check" data-checkbox="true" data-align="center"></th>
+    <th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+    <th data-field="name" data-sortable="true" data-align="center">角色名</th>
+    <th data-field="status" data-sortable="true" data-formatter="statusFormatter" data-align="center">状态</th>
+    <th data-field="remarks" data-align="center">说明</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+  $('#roleAdd').click(function(){
+       var index = layer.open({
+        title : '增加角色',
+        type : 2,
+        content : '__SYSTEM__/Role/addRole',
+        success : function(layero, index){
+          setTimeout(function(){
+            layer.tips('点击此处返回角色列表', '.layui-layer-setwin .layui-layer-close', {
+              tips: 3
+            });
+          },500)
+        }
+      });
+      //改变窗口大小时，重置弹窗的高度，防止超出可视区域（如F12调出debug的操作）
+      $(window).resize(function(){
+        layer.full(index);
+      })
+      layer.full(index);  
+  });
+  $('#roleEdit').click(function(){
+      var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+      if(selectedRows.length!=1){
+          layer.msg('编辑数量错误！请选择一个角色！');
+          return false;
+      }
+       var id = selectedRows[0].id;
+       var index = layer.open({
+        title : '修改角色',
+        type : 2,
+        content : '__SYSTEM__/Role/editRole?id='+id,
+        success : function(layero, index){
+          setTimeout(function(){
+            layer.tips('点击此处返回角色列表', '.layui-layer-setwin .layui-layer-close', {
+              tips: 3
+            });
+          },500)
+        }
+      });  
+      //改变窗口大小时，重置弹窗的高度，防止超出可视区域（如F12调出debug的操作）
+      $(window).resize(function(){
+        layer.full(index);
+      })
+      layer.full(index); 
+  });
+  $('#roleAuth').click(function(){
+      var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+      if(selectedRows.length!=1){
+          layer.msg('编辑数量错误！请选择一个角色！');
+          return false;
+      }
+       var id = selectedRows[0].id;
+       var index = layer.open({
+        title : '编辑角色权限',
+        type : 2,
+        content : '__SYSTEM__/Role/roleAuth/id/'+id,
+        success : function(layero, index){
+          setTimeout(function(){
+            layer.tips('点击此处返回角色列表', '.layui-layer-setwin .layui-layer-close', {
+              tips: 3
+            });
+          },500)
+        }
+      });  
+      //改变窗口大小时，重置弹窗的高度，防止超出可视区域（如F12调出debug的操作）
+      $(window).resize(function(){
+        layer.full(index);
+      });
+      layer.full(index); 
+  });
+  $('#roleDelete').click(function(){
+      layer.msg('暂不启用！');
+      return false;
+      var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+      if(selectedRows.length<1){
+          layer.msg('未选择要删除的角色！');
+          return false;
+      }
+      var delId = [];
+      for (var i = selectedRows.length - 1; i >= 0; i--) {
+         delId[delId.length] = selectedRows[i].id
+      }      
+      layer.open({
+        type:1,
+        content:'<div style="padding:20px;">确定删除角色吗？删除后不可恢复！</div>',
+        btn:['确认','取消'],
+        btn1:function(){
+         var index = layer.msg('删除数据中,请稍后',{icon:16,time:false,shade:0.8});
+         $.ajax({
+          url:'__SYSTEM__/Role/delete',
+          type:'post',
+          async:true,
+          data:{id:delId},
+          dataType:'json',
+          success:function(res){
+            layer.close(index);
+            layer.msg(res.msg);
+            if(res.status){
+              setTimeout(function(){
+                location.reload();
+              },400);
+            }
+          }
+         });
+        },
+        btn2:function(index){
+          layer.close(index);
+        }
+      });     
+  });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+function statusFormatter(_value){
+  return _value ? '<font class="text-success">启用</font>' :'<font class="text-error">禁用</font>';
+}
+var indexLoad = '';
+function XHRTable(callback){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__SYSTEM__/Role/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,{time: 10*1000,shade:0.2});
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'id',
+                  keyword:$('#keyword').val()
+              };
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

@@ -1,0 +1,93 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<fieldset class="layui-elem-field" style="margin-left:10%;margin-right:10%;margin-bottom:30px;margin-top:40px;">
+  <legend>应收报价</legend>
+  <div class="layui-field-box">
+	<div id="transer">
+		
+	</div>
+  </div>
+</fieldset>
+<fieldset class="layui-elem-field" style="margin-left:10%;margin-right:10%;margin-bottom:30px;">
+  <legend>派送报价</legend>
+  <div class="layui-field-box">
+	<div id="cost">
+		
+	</div>
+  </div>
+</fieldset>
+
+
+</block>
+<block name="baseScript">
+<script>
+var transer = '{$transer}';
+var cost = '{$cost}';
+transer = JSON.parse(transer);
+cost = JSON.parse(cost);
+layui.use(['form'],function(){
+	var form = layui.form
+		,$ = layui.jquery;
+	$('#transer').html(compile(transer));
+	$('#cost').html(compile(cost));
+	form.render();
+form.on('select()', function(data){
+  var field = $(data.elem).data('field');
+  var id = $(data.elem).parent().parent().data('id');
+/*  console.log(data.value); //得到被选中的值
+  console.log(field+'---'+id); //得到被选中的值*/
+  $.ajax({
+  	url:'__FINANCIAL__/QuotePriceForClient/updateQuotePrice',
+  	type:'post',
+  	data:{id:id,field:field,value:data.value,user_id:'{$Think.get.id}'},
+  	success:function(res){
+  		if(res.data != ''){
+  			$(data.elem).parent().parent().data('id',res.data)
+  		}
+  		layer.msg(res.msg);
+  	}
+  });
+});    
+function compile(data){
+	var	html = '<form class="layui-form">';
+	for (var i = 0; i < data.length; i++) {
+		var standard_v_status = '';
+		var standard_v_param = '';
+		html += '<div class="layui-form-item" data-id="'+data[i].rule_fee_user_id+'">';
+		html +=     '<label class="layui-form-label">'+data[i].fromTips+data[i].transportMode+'</label>';
+		html +=		'<div class="layui-input-inline">';
+		html += 		'<select data-field="rule_id" class="updateOption">';
+		html +=				'<option></option>';
+		for (var j = 0; j < data[i].transportDetail.length; j++) {
+			var selected = '';
+			if(data[i].transportDetail[j].sign == '1'){
+				standard_v_status = data[i].transportDetail[j].standard_v_status;
+				standard_v_param = data[i].transportDetail[j].standard_v_param;
+				selected = 'selected';
+			}
+			html +=	 '<option value="'+data[i].transportDetail[j].id+'" '+selected+'>'+data[i].transportDetail[j].detail+'</option>';
+		}		
+		html += 		'</select>';
+		html +=    	'</div>';
+		html +=		'<div class="layui-input-inline">';		
+		html +=			'<select data-field="standard_v_status">';
+		html += 		'<option ></option>';
+		html += 		'<option value="0" '+(standard_v_status=='0' ? 'selected':'')+'>不计算体积重</option>';
+		html += 		'<option value="1" '+(standard_v_status=='1' ? 'selected':'')+'>计算体积重</option>';
+		html +=			'</select>';
+		html +=		'</div>';
+		html +=		'<div class="layui-input-inline">';		
+		html +=			'<select data-field="standard_v_param">';
+		html += 		'<option ></option>';
+		html += 		'<option value="5000" '+(standard_v_param=='5000' ? 'selected':'')+'>5000</option>';
+		html += 		'<option value="6000" '+(standard_v_param=='6000' ? 'selected':'')+'>6000</option>';
+		html +=			'</select>';
+		html +=		'</div>';
+		html += '</div>';
+	}
+	html += '</form>';	
+	return html;
+}
+});
+</script>
+</block>

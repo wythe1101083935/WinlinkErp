@@ -1,0 +1,112 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+  <form class="layui-form" style="margin-top:50px;">
+    <div class="layui-form-item">
+    <div class="layui-inline">
+      <label class="layui-form-label">父目录</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input pid" lay-verify="required" value="{$id}">
+      </div>
+    </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">代码</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input name" lay-verify="required" placeholder="Name">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">名称</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input text" lay-verify="required" placeholder="名称">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">URL</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input url" lay-verify="required" placeholder="Order/Order/index">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">ICON</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input iconCls" lay-verify="required" placeholder="fa iconfont">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">图片</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input menu_img" lay-verify="required" placeholder="fa iconfont">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">STATUS</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input status" lay-verify="required" value="1">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">STATE</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input state" lay-verify="required" value="open">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">排序</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input index" lay-verify="required" value="1">
+      </div>
+    </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit="" lay-filter="add">立即提交</button>
+    </div>
+  </div>
+  </form>
+</block>
+<block name="baseScript">
+<script>
+layui.use(['form','jquery','layedit','laydate'],function(){
+  var form = layui.form,
+    layer = parent.layer === undefined ? layui.layer : parent.layer,
+    laypage = layui.laypage,
+    layedit = layui.layedit,
+    laydate = layui.laydate,
+    $ = layui.jquery;
+  form.on("submit(add)",function(data){
+    //弹出loading
+    var index = layer.msg('数据提交中，请稍候',{icon: 16,time:false,shade:0.8});
+    setTimeout(function(){
+      $.ajax({
+        url:'__SYSTEM__/Menu/insert',
+        type:'post',
+        data:{
+          pid:$('.pid').val(),
+          name:$('.name').val(),
+          text:$('.text').val(),
+          url:$('.url').val(),
+          iconCls:$('.iconCls').val(),
+          menu_img:$('.menu_img').val(),
+          status:$('.status').val(),
+          state:$('.state').val(),
+          index:$('.index').val()
+        },
+        dataType:'json',
+        success:function(res){
+          console.log(res);
+          if(res.status){
+            layer.msg(res.msg);
+            layer.close(index)
+            setTimeout(function(){parent.location.reload();},1000)
+          }else{
+            layer.close(index);
+            layer.msg(res.msg);
+          }
+        }
+      });     
+    },500);
+    return false;
+  });
+});
+</script>
+</block>

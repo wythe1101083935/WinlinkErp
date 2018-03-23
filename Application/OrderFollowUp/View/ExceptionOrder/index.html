@@ -1,0 +1,174 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">异常类型</a>
+        <dl class="layui-nav-child">
+          <foreach name="exceptionStatus" item="val">
+            <dd data-range="{$val.range}" class="exception"><a href="javascript:;">{$val.name}</a></dd>
+          </foreach> 
+        </dl>        
+      </li>
+    </ul> 
+    <form class="layui-layout-left layui-form" style="padding:10px;margin-left:20px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <div class="layui-input-inline">
+            <select name="modules" id="orderStatus">
+              <option value="0">所有</option>
+              <option value="2">已签收</option>
+              <option value="1">未签收</option>
+            </select>
+          </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入单号" id="awbno" class="layui-textarea" style="min-height:40px;height:40px;max-height:40px;"></textarea>
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+        <div class="layui-form-item">  
+            <div class="layui-inline">
+              <label class="layui-form-label" title="出库时间">Time(C)</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input" id="timeOut" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label" title="结束时间">Time(P)</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input" id="timeFinish" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">USER</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Country</label>
+                <div class="layui-input-inline">
+                    <select name="modules" id="country" lay-search="">
+                        <option value="0">所有</option>
+                        <option value="SA">沙特</option>
+                        <option value="OM">阿曼</option>
+                        <option value="AE">阿联酋(旧)</option>
+                        <option value="AE1">阿联酋</option>
+                        <option value="AE2">阿联酋(偏远)</option>
+                        <option value="BH">巴林</option>
+                        <option value="EG">埃及</option>
+                        <option value="QA">卡塔尔</option>
+                        <option value="IR">伊朗</option>
+                        <option value="KWT">科威特</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                    <input type="button" class="layui-btn" id="search1" value="查询"/>
+                    <input type="reset" class="layui-btn" id="" value="重置"/>
+            </div>
+        </div>   
+</block>
+<block name="baseFields">
+    <th class="check" data-checkbox="true"></th>
+    <th data-field="id" data-align="center" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+    <th data-field="awbno" data-align="center" data-width="110" data-formatter="awbFormatter">单号</th>
+    <th data-field="time" data-align="center" data-width="100" data-formatter="timeFormatter">时间</th>
+    <th data-field="username" data-align="center" data-width="90">客户名</th>
+    <th data-field="userrefid" data-align="center" data-width="140">原单号</th>
+    <th data-field="refcode" data-align="center" data-width="140">转单号</th>
+    <th data-field="exception_description" data-align="center" data-width="150">异常说明</th>
+    <th data-field="exception_remarks" data-align="center" data-width="150">异常轨迹</th>
+    <th data-field="create_time" data-align="center" data-formatter="timeFormatter" data-width="100">异常时间</th>
+    <th data-field="status_flag" data-align="center" data-width="100" data-formatter="stFormatter">订单状态</th>
+   <th data-field="finish_time" data-align="center" data-width="100" data-formatter="timeFormatter">签收时间</th>
+    <th data-field="update_time" data-align="center" data-width="100" data-formatter="timeFormatter">更新时间</th>              
+</block>
+<block name="baseScript">
+<script>
+function isHandleFomatter(_value){
+    return _value=='1' ? '已完成' : '未完成'
+}
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#timeOut',type:'datetime',range:'~',theme:'#393D49'});
+    laydate.render({elem:'#timeFinish',type:'datetime',range:'~',theme:'#393D49'});
+    $('.exception').click(function(){
+      XHRTable($(this).data('range'));
+    });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+function XHRTable(exceptionStatus = false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__ORDERFOLLOWUP__/ExceptionOrder/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'time',
+                  awbno:$('#awbno').val(),
+                  timeOut:$('#timeOut').val(),
+                  timeFinish:$('#timeFinish').val(),
+                  username:$('#username').val(),
+                  country:$('#country').val(),
+                  orderStatus:$('#orderStatus').val()
+              };
+              if(exceptionStatus){
+                param.exceptionStatus = exceptionStatus;
+              }
+              //console.log(param);
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

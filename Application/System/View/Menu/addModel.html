@@ -1,0 +1,61 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+  <form class="layui-form" style="margin-top:50px;">
+    <div class="layui-form-item">
+      <label class="layui-form-label">ModuleName</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input ModuleName" lay-verify="required" placeholder="ModuleName">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">ModelName</label>
+      <div class="layui-input-block">
+        <input type="text" class="layui-input ModelName" lay-verify="required" placeholder="ModelName">
+      </div>
+    </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit="" lay-filter="add">立即提交</button>
+    </div>
+  </div>
+  </form>
+</block>
+<block name="baseScript">
+<script>
+layui.use(['form','jquery','layedit','laydate'],function(){
+  var form = layui.form,
+    layer = parent.layer === undefined ? layui.layer : parent.layer,
+    laypage = layui.laypage,
+    layedit = layui.layedit,
+    laydate = layui.laydate,
+    $ = layui.jquery;
+  form.on("submit(add)",function(data){
+    //弹出loading
+    var index = layer.msg('数据提交中，请稍候',{icon: 16,time:false,shade:0.8});
+    setTimeout(function(){
+      $.ajax({
+        url:'__SYSTEM__/Menu/createModel',
+        type:'post',
+        data:{
+          ModuleName:$('.ModuleName').val(),
+          ModelName:$('.ModelName').val()
+        },
+        dataType:'json',
+        success:function(res){
+          console.log(res);
+          if(res.status){
+            layer.msg(res.msg);
+            layer.close(index)
+            setTimeout(function(){parent.location.reload();},1000)
+          }else{
+            layer.close(index);
+            layer.msg(res.msg);
+          }
+        }
+      });     
+    },500);
+    return false;
+  });
+});
+</script>
+</block>

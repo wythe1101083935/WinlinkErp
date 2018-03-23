@@ -1,0 +1,129 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">输入轨迹信息</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="updateTracker0" >更新</a></li>   
+    </ul>   
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="clearInfo" >清空</a></li>      
+    </ul> 
+</block>
+<block name="baseAdvancedSearch">
+        <div class="layui-form-item">  
+            <div class="layui-inline">
+              <label class="layui-form-label">时间</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input" id="trackerTime" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">轨迹</label>
+              <div class="layui-input-inline">
+                <select  id="tracker" lay-verify="" lay-search>
+                  <option value=""></option>
+                  <foreach name="tracker" item="val">
+                    <option value="{$val.id}">{$val['code']} - {$val['names']}</option>
+                  </foreach>
+                </select>
+              </div>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text" style="width:622.2px;">
+              <label class="layui-form-label">单号</label>
+              <div class="layui-input-block">
+                  <textarea placeholder="请输入单号" id="awbnos" class="layui-textarea"></textarea>
+              </div>
+        </div>
+        <div class="layui-form-item">
+              <div class="layui-input-block">
+                  <input type="button" class="layui-btn" id="updateTracker1" value="更新"/>
+                  <input type="reset" class="layui-btn" id="" value="重置"/>
+              </div>
+        </div>  
+</block>
+<block name="baseFields">
+  <th data-field="Index"  data-formatter="idFormatter" data-width="40" data-align="center">ID</th>
+  <th data-field="awbno" data-width="110" data-align="center">单号</th>
+  <th data-field="localDbStatus" data-formatter="statusFormatter" data-align="center">本地轨迹写入</th>
+  <th data-field="localDbMsg" data-align="center">本地轨迹写入详情</th>
+  <th data-field="netDbStatus" data-align="center" data-formatter="statusFormatter">FFC信息推送</th>
+  <th data-field="netDbMsg" data-align="center">FFC信息推送详情</th>
+</block>
+<block name="baseScript">
+<script>
+Array.prototype.notempty = function(){
+    return this.filter(t => t!=undefined && t!==null && t!='');
+}
+var layer = '';
+var $total = 0;
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#trackerTime',type:'datetime',theme:'#393D49'});
+    $('#clearInfo').click(function(){
+      $('#DataTable').bootstrapTable('removeAll');
+    });
+    $('#updateTracker0,#updateTracker1').click(function(){
+      $('#advancedSearch').slideUp(300);
+      var $awbnos = $('#awbnos').val();
+      var $tracker = $('#tracker').val();
+      if($tracker == ''){
+          layer.msg('轨迹不能为空！');
+          return false;
+      }
+      var $time = $('#trackerTime').val();
+      if($time== ''){
+          layer.msg('时间不能为空！');
+          return false;
+      }
+      var awbnos = Array();
+      awbnos = $awbnos.split('\n');
+      awbnos = awbnos.notempty();
+      for (var i = 0; i < awbnos.length; i++) {
+          $.ajax({
+              url:'http://sff.winlinklogistics.com/WinlinkErp/index.php/Tracker/UpdateTracker/updateTracker?uid='+{$Think.session.uid}
+              ,type:'post'
+              ,async:true
+              ,data:{awbnos:awbnos[i],remarks:$tracker,time:$time}
+              ,dataType:'json'
+              ,success:function(res){
+                  $('#DataTable').bootstrapTable('insertRow',{
+                      index:$('#DataTable').bootstrapTable('getOptions').totalRows,
+                      row:res
+                  });
+                  //console.log(res);
+              }
+          });
+      } 
+      $total = i;     
+    });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+function statusFormatter(_value){
+  return _value ? '<font class="text-success">成功！</font>':'<font style="color:#FF5722;">失败！</font>'
+}
+function XHRTable(selectTime = false){
+  indexLoad = layer.load(2,loadStyle);
+  $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+            height: getHeight(),
+            pagination: true,
+            pageList: [25,50,100], 
+            classes:'layui-table text-nowrap',
+            onResetView:function(){
+              layer.close(indexLoad);             
+            },
+      formatNoMatches: function(){
+         return '输入轨迹信息后开始更新';
+      }
+  });
+}
+</script>
+</block>

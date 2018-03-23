@@ -1,0 +1,65 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="hideToolbarStart"></block>
+<block name="baseToolbar"></block>
+<block name="hideToolbarEnd"></block>
+<block name="baseAdvancedSearch">
+</block>
+<block name="baseFields">
+    <th class="check" data-checkbox="true"></th>
+    <th data-field="receivable_id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+    <th data-field="receivable_time" data-width="100" data-align="center" data-formatter="timeFormatter" data-sortable="true">创建时间</th>
+    <th data-field="receivable_account" data-width="100" data-align="center">收款</th>
+    <th data-field="receivable_bank" data-width="100" data-align="center">收款账号</th>
+    <th data-field="username" data-width="100" data-align="center">记录人</th>
+    <th data-field="receivable_remark" data-width="200" data-align="center">备注</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,$ = layui.jquery;
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+function XHRTable(){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__FINANCIAL__/ReceivableBatch/XHRReceivableDetail", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'receivable_time',
+                  batch_id:{$Think.get.batch_id}
+              };
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

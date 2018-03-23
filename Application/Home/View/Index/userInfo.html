@@ -1,0 +1,163 @@
+<extend name="./Public/view/form.html" />
+<block name="baseTitile">发件信息</block>
+<block name="baseForm">
+	<div class="layui-form-item" style="margin-top:40px;">
+		<div class="layui-inline">
+			<label  class="layui-form-label">账号</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input layui-disabled" disabled="" value="{$editData.username}">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label  class="layui-form-label">邮箱</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input email" lay-verify="required" value="{$editData.email}">
+			</div>			
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label  class="layui-form-label">寄件公司</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input customer_company" lay-verify="required" value="{$editData.customer_company}">
+			</div>			
+		</div>
+		<div class="layui-inline">
+			<label  class="layui-form-label">寄件姓名</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input customer_name" lay-verify="required" value="{$editData.customer_name}">
+			</div>
+		</div>	
+	</div>
+	<div class="layui-form-item">	
+		<div class="layui-inline">	
+			<label  class="layui-form-label">寄件地址</label>
+		    <div class="layui-input-inline">
+		      <select lay-filter="s1" id="s1" lay-search="" class="customer_add1">
+		        <option value="">请选择省</option>
+		      </select>
+		    </div>
+		    <div class="layui-input-inline">
+		      <select lay-filter="s2" id="s2" lay-search="" class="customer_add2">
+		        <option value="">请选择市</option>
+		      </select>
+		    </div>
+		    <div class="layui-input-inline">
+		      <select lay-filter="s3" id="s3" lay-search="" class="customer_add3">
+		        <option value="">请选择县/区</option>
+		      </select>
+		    </div>	
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text">
+		<label  class="layui-form-label">详细地址</label>
+		<div class="layui-input-block">
+			<textarea class="layui-textarea customer_add4" lay-verify="required" value="">{$editData.customer_add4}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label  class="layui-form-label">联系号码</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input customer_tel" lay-verify="required" value="{$editData.customer_tel}">
+			</div>
+		</div>	
+	</div>
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label  class="layui-form-label">传真号</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input customer_fax" lay-verify="required" value="{$editData.customer_fax}">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label  class="layui-form-label">寄件邮编</label>
+			<div class="layui-input-inline">
+				<input type="text" class="layui-input customer_zipcode" lay-verify="required" value="{$editData.customer_zipcode}">
+			</div>
+		</div>		
+	</div>
+	<div class="layui-form-item" style="margin-top:30px;">
+		<div class="layui-input-block">
+			<input type="button" class="layui-btn" lay-submit="" lay-filter="submitData" value="确认修改">
+		</div>
+	</div>
+</block>
+<block name="baseScript">
+<script>
+var add1 = '{$editData.customer_add1}',add2 = '{$editData.customer_add2}',add3='{$editData.customer_add3}',id='{$editData.id}';
+layui.use(['form','layer','jquery'],function(){
+  var form = layui.form,
+    layer = layui.layer,
+    $ = layui.jquery;
+  /*监听表单提交*/
+  form.on("submit(submitData)",function(data){
+    //弹出loading
+      var index = layer.load(2,loadStyle); 
+      setTimeout(function(){
+	    $.ajax({
+	      url:'__USER__/User/update',
+	      type:'post',
+	      data:{
+			id:id,
+	        email:$('.email').val(),
+	        customer_company:$('.customer_company').val(),
+	        customer_name:$('.customer_name').val(),
+	        customer_add1:$('.customer_add1').val(),
+	        customer_add2:$('.customer_add2').val(),
+	        customer_add3:$('.customer_add3').val(),
+	        customer_add4:$('.customer_add4').val(),
+	        customer_tel:$('.customer_tel').val(),
+	        customer_fax:$('.customer_fax').val(),
+	        customer_zipcode:$('.customer_zipcode').val()
+	      },
+	      success:function(res){
+	          layer.close(index);
+	          layer.msg(res.msg);
+	        if(res.status){     
+	          setTimeout(function(){
+	            window.location.reload();
+	          },500);
+	        }   
+	      }
+	    });      	
+	},500);    
+    return false;
+  })
+	function change(v,selectedValue='nothing',) {
+	    var str = "0";
+	    for (i = 0; i < v; i++) { str += ("_" + (document.getElementById(s[i]).selectedIndex - 1));}
+	    ;
+	    var ss = document.getElementById(s[v]);
+	    with (ss) {
+	        length = 0;
+	        options[0] = new Option(opt0[v], opt0[v]);
+	        if (v && document.getElementById(s[v - 1]).selectedIndex > 0 || !v) {
+	            if (dsy.Exists(str)) {
+	                ar = dsy.Items[str];
+	                for (i = 0; i < ar.length; i++){	
+	                	options[length] = new Option(ar[i], ar[i]);
+	                	if(selectedValue == ar[i]){
+	                		options[length-1].selected = true;
+	                	}
+	                }
+	            }
+	        }
+	    }
+	    form.render('select');
+	}
+	var s = ["s1", "s2", "s3"];
+	var opt0 = ["省份", "地级市", "市、县级市、县"];
+	change(0,add1);
+	change(1,add2);
+	change(2,add3);
+	form.on('select(s1)',function(){
+		change(1)
+	});
+	form.on('select(s2)',function(){
+		change(2)
+	});  
+});
+</script>
+<script src="__PUBLIC__/js/geo.js"></script>
+</block>

@@ -1,0 +1,117 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="search1" >查询</a></li>
+    </ul> 
+    <form class="layui-layout-left" style="padding:10px;left:100px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="用户名/手机号/邮箱/公司" id="awbno" class="layui-textarea" style="min-height:40px;height:40px;max-height:40px;"></textarea>
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部<a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页<a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseFields">
+    <th class="check" data-checkbox="true" data-width="40"></th>
+    <th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+    <th data-field="username" data-align="center" data-sortable="true" data-formatter="quotePriceFormmater">账号</th>
+    <th data-field="status" data-align="center" data-formatter="statusFormmater">状态</th>
+    <th data-field="email" data-align="center" >邮箱</th>
+    <th data-field="customer_company" data-align="center" data-sortable="true">公司</th>
+    <th data-field="customer_name" data-align="center" >用户名</th>
+    <th data-field="customer_tel" data-align="center">手机</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    $('#DataTable').on('click','.quotePrice',function(){
+      var id =$(this).data('id');
+      var name = $(this).text();
+      var index = layer.open({
+        title:name+'报价',
+        type:2,
+        content:'__FINANCIAL__/QuotePriceForClient/quotePrice/id/'+id,
+        success : function(layero, index){
+          setTimeout(function(){
+                layer.tips('点击此处返回客户列表', '.layui-layer-setwin .layui-layer-close', {
+                  tips: 3
+                });
+          },500)
+        }
+      });
+      layer.full(index);
+    })
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+function statusFormmater(_value){
+  return _value ? '<font class="text-success">启用</font>' :'<font class="text-error">禁用</font>';
+}
+function quotePriceFormmater(value,row,index){
+  return '<div style="cursor:pointer;width:100%" title="点击查看编辑客户报价" href="javascript:;" data-id="'+row.id+'" class="quotePrice text-warning">'+value+'</div>';
+}
+var indexLoad = '';
+function XHRTable(selectTime = false, status = false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__FINANCIAL__/QuotePriceForClient/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'id',
+                  awbno:$('#awbno').val()
+              };
+              if(selectTime){
+                param.timeOut = selectTime;
+              }
+              if(status){
+                param.orderStatus = status;
+              }
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

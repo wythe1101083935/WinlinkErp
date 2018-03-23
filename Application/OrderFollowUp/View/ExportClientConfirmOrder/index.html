@@ -1,0 +1,115 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="search1">查询</a></li>
+    </ul> 
+    <form class="layui-layout-left" style="padding:10px;left:90px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入单号" id="awbno" class="layui-textarea" style="min-height:40px;height:40px;max-height:40px;"></textarea>
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseFields">
+    <th data-field="state" data-width="40" data-checkbox="true"></th>
+    <th data-field="Index" data-width="40" data-align="center" data-formatter="indexFormatter">序号</th>
+    <th data-width="90" data-field="username" data-align="center">客户名</th>
+    <th data-width="90" data-field="consigneephone" data-align="center">收货人电话</th>
+    <th data-width="110" data-field="awbno" data-align="center">单号</th>
+    <th data-width="90" data-field="client_weight" data-align="center">客户重量</th>
+    <th data-width="60" data-field="vlength" data-align="center">长</th>
+    <th data-width="60" data-field="vwidth" data-align="center">宽</th>
+    <th data-width="60" data-field="vheight" data-align="center">高</th>
+    <th data-width="90" data-field="vweight" data-align="center">体积重</th>
+    <th data-width="90" data-field="cweight" data-align="center">实际重量</th>
+    <th data-width="90" data-field="bill_cacuweight" data-align="center">计算重</th>
+    <th data-width="90" data-field="userrefid" data-align="center">原单号</th>
+    <th data-width="110" data-field="refcode" data-align="center">转单号</th>
+    <th data-width="90" data-field="consigneecountry" data-align="center">国家</th>
+    <th data-width="90" data-field="time" data-formatter="timeFormatter" data-align="center">录入时间</th>
+    <th data-width="90" data-field="servicetype" data-align="center">付款类型</th>             
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#timeOut',type:'datetime',range:'~',theme:'#393D49'});
+    laydate.render({elem:'#timeFinish',type:'datetime',range:'~',theme:'#393D49'});
+    $('#awbno').keydown(function(e){
+      if(e.keyCode == 13){
+        $('#search').click();
+      }
+    });
+    $('.quickTime').click(function(){
+      XHRTable($(this).data('time'));
+    });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+function XHRTable(selectTime = false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__ORDERFOLLOWUP__/ExportClientConfirmOrder/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'id',
+                  awbno:$('#awbno').val(),
+                  timeOut:$('#timeOut').val(),
+                  timeFinish:$('#timeFinish').val(),
+                  username:$('#username').val(),
+                  country:$('#country').val()
+              };
+              if(selectTime){
+                param.timeOut = selectTime;
+              }
+              //console.log(param);
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

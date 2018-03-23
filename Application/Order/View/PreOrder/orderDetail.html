@@ -1,0 +1,478 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<form class="layui-form layui-form-pane" id="DataForm">
+<div style="margin-left:10%;margin-right:10%;margin-top:28px;">
+	<fieldset class="layui-elem-field">
+	  <legend>订单信息</legend>
+	  <div class="layui-field-box">
+			<div class="layui-form-item">
+				<input type="hidden" name="id">
+				<div class="layui-inline">
+					<label class="layui-form-label">原单号</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" tabindex="-1" name="ShipperRef">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">是否带电*</label>
+					<div class="layui-input-inline">
+						<select name="battery" tabindex="-1">
+	                       <option value="0" selected>不带电池</option>
+	                       <option value="1">带有电池</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">付款类型*</label>
+					<div class="layui-input-inline">
+						<select name="ServiceType" tabindex="-1" lay-filter="ServiceType">
+	                       <option value="NOR" selected>预付</option>
+	                       <option value="NCND">到付</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">代收金额</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field layui-disabled" tabindex="-1" name="InAmt" disabled="" value="0" lay-verify="required|number" lay-verType="tips">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">重量*</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="weight" lay-verify="required|number" lay-verType="tips">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">包裹类型*</label>
+					<div class="layui-input-inline">
+						<select name="product">
+	                       <option value="XPS" selected>包裹</option>
+	                       <option value="DOX">文件</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">数量*</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="noofpieces" lay-verify="required|number" lay-verType="tips">
+					</div>
+				</div>
+			</div>
+	        <div class="layui-form-item layui-form-text">
+	              <label class="layui-form-label">备注</label>
+	              <div class="layui-input-block" style="margin-top:0px;">
+	                  <textarea placeholder="" name="customnote" class="layui-textarea field"></textarea>
+	              </div>
+	        </div>
+	  </div>
+	</fieldset>
+</div>
+<div style="margin-left:10%;margin-right:10%;margin-top:28px;">
+	<fieldset class="layui-elem-field">
+	  <legend>收件人地址</legend>
+	  <div class="layui-field-box">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">收件公司</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="Consignee">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">收件人*</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="ConsigneeName" lay-verify="required" lay-verType="tips">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">电话*</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="ConsigneePhone" lay-verify="required|number" lay-verType="tips" >
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">固定电话</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="ConsigneeTel">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">国家*</label>
+					<div class="layui-input-inline">
+						<select name="ConsigneeCountry" lay-search="" lay-filter="country" lay-verify="required" lay-verType="tips">		
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">城市*</label>
+					<div class="layui-input-inline">
+						<select name="ConsigneeCity" lay-search="" lay-verify="required" lay-verType="tips">	
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">邮编</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input field" name="postcode">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">起运*</label>
+					<div class="layui-input-inline">
+						<select name="FromCountry">
+							<option value="CZX" selected>中国</option>
+							<option value="DXB">迪拜</option>
+						</select>
+					</div>
+				</div>
+		        <div class="layui-form-item layui-form-text">
+		              <label class="layui-form-label">地址*</label>
+		              <div class="layui-input-block" style="margin-top:0px;">
+		                  <textarea placeholder="" name="ConsigneeAddress1" class="layui-textarea field" lay-verify="required" lay-verType="tips"></textarea>
+		              </div>
+		        </div>
+			</div>	
+	  </div>
+	</fieldset>
+</div>
+<div style="margin-left:10%;margin-right:10%;" id="Invoice">
+	<fieldset class="layui-elem-field">
+	  <legend>货物详情</legend>
+	  <div class="layui-field-box">
+	    <table class="layui-hide" id="DataTable" lay-filter="DataTable"></table>
+	  </div>
+	</fieldset>
+</div>
+<div style="margin-left:10%;margin-right:10%;margin-bottom:35px" id="subBtn">
+    <div class="layui-form-item" id="formSubmit">
+        <div class="layui-input-block">
+            <input type="button" class="layui-btn" id="updateOrder" lay-submit lay-filter="updateOrder" value="提交"/>
+        </div>
+    </div> 
+</div>
+</form>
+</block>
+<block name="baseScript">
+<script>
+var AllData = JSON.parse('{$AllData}');
+var MsgStyle = {icon:6};
+layui.use(['table','element','form'],function(){
+  	var table = layui.table
+      ,element = layui.element
+      ,form = layui.form
+      ,$ = layui.jquery;
+	$(document).ready(function(){
+		/*初始化国家和地区数据*/
+		if(!window.localStorage.CountryCity){
+			getCountryCity();
+		}
+		/*获取传入的信息*/
+		window.localStorage.detail_formData = JSON.stringify(AllData.formData);
+		for (var i = 0; i < AllData.tableData.length; i++) {
+			if(AllData.tableData[i].id==0){
+				AllData.tableData[i].action = '<i class="layui-icon addInvoice" style="font-size: 30px; color: #1E9FFF;">&#xe61f;</i>';
+			}else{
+				AllData.tableData[i].action = '<i class="layui-icon delInvoice" data-id="'+AllData.tableData[i].id+'" style="font-size: 30px; color: #FF5722;">&#xe640;</i>';	
+	  		}		
+	  	}
+	  	window.localStorage.detail_tableData  = JSON.stringify(AllData.tableData);
+		/*国家和城市下拉列表加入值*/
+		country();
+		if(window.localStorage.detail_formData){
+			var consigneeCountry = JSON.parse(window.localStorage.detail_formData).ConsigneeCountry
+			if(consigneeCountry != 'undefined'){
+				city(consigneeCountry);
+			}
+			
+		}
+		/*表格赋值*/
+		tableData = JSON.parse(window.localStorage.detail_tableData);
+		XHRTable(tableData,AllData.status);
+		/*是否显示提交按钮*/
+		if(AllData.status){
+			$('#subBtn').css('display','block');
+		}else{
+			$('#subBtn').css('display','none');
+		}
+		/*赋值给表单*/
+		var formData = JSON.parse(window.localStorage.detail_formData);
+		for(var i in formData){
+			$('[name="'+i+'"]').val(formData[i]);
+			if(i=='ServiceType' && formData[i] == 'NCND'){
+				$('[name=InAmt]').removeClass('layui-disabled');
+				$('[name=InAmt]').attr('disabled',false);				
+			}
+			
+		}
+
+	});
+	/*提交数据*/
+	form.on('submit(updateOrder)',function(){
+		var formTmp = $('#DataForm').serializeArray();
+		var formData = {};
+		for (var i = 0; i < formTmp.length; i++) {
+			formData[formTmp[i].name] = formTmp[i].value;
+		}
+		/*验证table中的数据*/
+		var checked = checkTable();
+		if(!checked.status){
+			var thetd = $('#DataTable').next().find('tr').eq(checked.row).find('td').eq(checked.col);
+			thetd.click();
+			layer.tips(checked.msg,thetd);
+			return false;
+		}
+		//console.log(formData);
+		var tableData = JSON.parse(window.localStorage.detail_tableData);
+		$.ajax({
+			url:'__ORDER__/PreOrder/updateOrder',
+			type:'post',
+			async:true,
+			dataType:'json',
+			data:{formData:formData,tableData:tableData},
+			success:function(res){
+				if(res.status){
+					layer.msg(res.msg);
+					setTimeout(function(){
+						window.location.reload();
+					},500);
+				}else{
+					layer.msg(res.msg);
+				}
+				
+				
+			}
+		});
+
+		return false;
+	})
+	/*表格货物数据修改*/
+	table.on('edit(DataTable)', function(obj){
+	  var tableData = JSON.parse(window.localStorage.detail_tableData);
+	  for (var i = 0; i < tableData.length; i++) {
+	  	if(tableData[i].id == obj.data.id){
+	  		tableData[i][obj.field] = obj.value;
+	  		break;
+	  	}
+	  }
+	  window.localStorage.detail_tableData = JSON.stringify(tableData);
+	});
+	/*增加一行*/
+	$('#Invoice').on('click','.addInvoice',function(){
+		addInvoice();
+	});
+	/*删除一行*/
+	$('#Invoice').on('click','.delInvoice',function(){
+		var tableData = JSON.parse(window.localStorage.detail_tableData);
+		for (var i = 0; i < tableData.length; i++) {
+			if(tableData[i].id == $(this).data('id')){
+				console.log($(this).data('id'));
+				tableData.splice(i,1);
+				break;
+			}
+		}
+		window.localStorage.detail_tableData = JSON.stringify(tableData);
+		table.reload('DataTable',{data:tableData});
+	});
+	/*服务类型-代收金额联动*/
+	form.on('select(ServiceType)',function(data){
+		if(data.value == 'NOR'){
+			$('[name=InAmt]').addClass('layui-disabled');
+			$('[name=InAmt]').attr('disabled',true);
+			$('[name=InAmt]').val('0');
+			var formData = {};
+			if(window.localStorage.formData){
+				formData = JSON.parse(window.localStorage.formData);
+			}
+			var key = 'InAmt';
+			var value = 0;
+			//check(key,value,$(data.elem))//验证
+			formData[key] = value;
+			window.localStorage.formData = JSON.stringify(formData);			
+		}else if(data.value == 'NCND'){
+			$('[name=InAmt]').removeClass('layui-disabled');
+			$('[name=InAmt]').attr('disabled',false);
+		}
+	})
+	/*表格enter键跳到下一个*/
+	$('#Invoice').on('keydown','td',function(e){
+		if(e.keyCode == 13 || e.keyCode == 9){
+			if($(this).data('field')=='invoice_hscod'){
+				/*if($(this).parent('tr').next('tr').length < 1){
+					addInvoice(function(){
+						$('#Invoice').find('tr:last').find('td:first').click();
+					});	*/	
+				//}else{
+					$(this).parent('tr').next('tr').find('td:first').click();
+				//}
+			}else{
+				$(this).next('td').click();
+			}
+		}
+	});
+	/*提交修改*/
+
+	/*国家-城市联动*/
+	form.on('select(country)',function(data){
+		if(data.value){
+			city(data.value);		
+		}
+	})
+	/*重新调整表格大小*/
+	$(window).resize(function() {
+	  XHRTable(JSON.parse(window.localStorage.detail_tableData));
+	});
+	/*增加一行数据*/
+	function addInvoice(callBack){
+		var tableData = JSON.parse(window.localStorage.detail_tableData);
+		if(tableData.length >= 10){
+			layer.msg('最多添加10条发票信息！');
+			return false;
+		}
+		var tmp = tableData.pop();
+		var nowId = tmp.id+1;
+		tableData.push(tmp);
+		tableData.push({'id':nowId,
+			'invoice_name':'','invoice_weight':'','invoice_pcs':'','invoice_description':'','invoice_hscod':'','action':'<i class="layui-icon delInvoice" data-id="'+nowId+'" style="font-size: 30px; color: #FF5722;">&#xe640;</i>'
+		});
+		window.localStorage.detail_tableData = JSON.stringify(tableData);
+		table.reload('DataTable',{data:tableData,done : function(res, curr, count){callBack && callBack();}});	
+	}
+	/*初始化表格*/
+	function XHRTable($data,$sign){
+		var edit = '',action = '';
+		if($sign){
+			edit = 'text';
+			action = {
+	       			     field: 'action',
+	                     valign:"middle",
+	                     align:"center",
+	                     title: "",
+	                 }
+		}
+	    table.render({
+	    elem:'#DataTable',
+	    cols:[
+	             [
+	                 {
+	                     title: "货物名称",
+	                     field: 'invoice_name',
+	                     valign:"middle",
+	                     align:"center",
+	                     edit: edit
+	                 },
+	                 {
+	                     title: "重量",
+	                     field: 'invoice_weight',
+	                     valign:"middle",
+	                     align:"center",
+	                     edit: edit
+	                 },
+	                 {
+	                     title: "数量",
+	                     field: 'invoice_pcs',
+	                     valign:"middle",
+	                     align:"center",
+	                     edit: edit
+	                 },
+	                 {
+	                     title: "规格",
+	                     field: 'invoice_description',
+	                     valign:"middle",
+	                     align:"center",
+	                     edit: edit
+	                 },
+	                 {
+	                     title: "申报价值",
+	                     field: 'invoice_insvalue',
+	                     valign:"middle",
+	                     align:"center",
+	                     edit: edit
+	                 },
+	                 {
+	                     title: "商品编码",
+	                     field: 'invoice_hscod',
+	                     valign:"middle",
+	                     align:"center",
+	                     edit: edit
+	                 },	                 
+	                 action,
+	             ]
+	         ],
+	    data:$data
+	  });  
+	}	
+	/*获得国家城市列表*/
+	function getCountryCity(){
+		$.ajax({
+			url:'__ORDER__/CreateOrder/getCountryJson',
+			async:false,
+			type:'post',
+			dataType:'json',
+			success:function(res){
+				window.localStorage.CountryCity = JSON.stringify(res);
+			}
+		});
+	}
+	/*国家列表选项加入*/
+	function country(){
+		var CountryCityList = JSON.parse(window.localStorage.CountryCity);
+		var CountryList = CountryCityList.COUNTRY;
+		var htmlContent = '';
+		for (var i = 0; i < CountryList.length; i++) {
+			htmlContent +=  '<option value="'+CountryList[i].CID+'">'+CountryList[i].CID+'  '+ CountryList[i].CName+' </option>';
+		}
+		$('[name="ConsigneeCountry"]').append(htmlContent);
+		form.render('select');
+	}
+	/*城市列表选项加入*/
+	function city(countryid){
+		var CountryCityList = JSON.parse(window.localStorage.CountryCity);
+		var CountryList = CountryCityList.COUNTRY;
+		var CityList = CountryCityList.CITY;
+		CityList = CityList[countryid];
+		var htmlContent = '';
+        for (var i = 0; i < CityList.length; i++) {
+            htmlContent +=  '<option value="'+CityList[i].CodeName.toUpperCase()+'">'+ CityList[i].CodeId +'  '+ CityList[i].CodeName+' </option>';
+        }
+        $('[name="ConsigneeCity"]').html(' ').append(htmlContent);	
+        form.render('select');	
+	}
+	/*验证表格*/
+	function checkTable(){
+		var tableData = JSON.parse(window.localStorage.detail_tableData);
+		/*验证数据*/
+		var numberInt = /^[0-9]+$/;//整数
+		var number = /^[0-9]+.?[0-9]*$/;//小数
+		var str = /^[0-9a-zA-Z]+$/;//非特殊字符
+		for (var i = 0; i < tableData.length; i++) {
+			/*1.验证invoice_name*/
+			if(tableData[i].invoice_name == '') return {status:false,msg:'必填项不能为空！',row:i+1,col:0};
+
+			/*2.验证invoice_weight*/
+			if(tableData[i].invoice_weight == '') return {status:false,msg:'必填项不能为空！',row:i+1,col:1};
+			if(!number.test(tableData[i].invoice_weight)) return {status:false,msg:'只能填写数字！',row:i+1,col:1};
+
+			/*3.验证invoice_pcs*/
+			if(tableData[i].invoice_pcs == '') return {status:false,msg:'必填项不能为空！',row:i+1,col:2};
+			if(!numberInt.test(tableData[i].invoice_pcs)) return {status:false,msg:'只能填写整数！',row:i+1,col:2};
+
+			/*4.验证invoice_description--无需验证*/
+			/*if(tableData[i].invoice_description == ''){
+				return {status:false,msg:''};
+			}*/
+
+			/*5.验证invoice_insvalue*/
+			if(tableData[i].invoice_insvalue == '') return {status:false,msg:'必填项不能为空！',row:i+1,col:4};
+			if(!number.test(tableData[i].invoice_insvalue)) return {status:false,msg:'只能填写数字！',row:i+1,col:4};
+
+			/*6.验证invoice_hscod*/
+			if(tableData[i].invoice_hscod == '') return {status:false,msg:'必填项不能为空！！',row:i+1,col:5};
+			if(!str.test(tableData[i].invoice_hscod)) return {status:false,msg:'含有特殊字符！只能由数字字母组成！',row:i+1,col:5};
+		}
+		return {status:true}
+	}
+
+});
+</script>
+</block>

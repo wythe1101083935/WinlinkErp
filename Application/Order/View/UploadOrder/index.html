@@ -1,0 +1,620 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="uploadAwb">选择文件</a></li>    
+      <li class="layui-nav-item"><a href="javascript:;" id="uploadV">生成订单</a></li>
+    </ul>   
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="__PUBLIC__/file/UploadModel.xls" >下载模板</a></li>      
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部<a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页<a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>    
+    </ul> 
+   <input type="file" name="xlfile" id="xlf" style="display:none;"/>
+</block>
+<div style="display:none" id="uploadOrderSign"></div>
+</block>
+<block name="baseFields">
+</block>
+<block name="baseScript">
+<link href="__PUBLIC__/css/bootstrap-editable.min.css" rel="stylesheet">
+<style>
+  .editable-click, a.editable-click, a.editable-click:hover {
+    text-decoration: none;
+    border-bottom: dashed 0px #08c;
+}
+</style>
+<script src="__PUBLIC__/js/bootstrap-editable.min.js"></script>
+<script src="__PUBLIC__/js/bootstrap-table-editable.min.js"></script>
+<script>
+var layer = '';
+var transportModeList = '';
+layui.use(['form','jquery','layer','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,$ = layui.jquery;
+    $('#uploadAwb').click(function(){
+      $('#xlf').click();
+    });
+    $('#uploadV').click(function(){
+      var tmpData = $('#DataTable').bootstrapTable('getData');
+      if(tmpData.length < 1){
+        layer.msg('尚未上传文件！');
+        return ;
+      }
+      var $data = jQuery.extend(true,[], tmpData);
+      $('#DataTable').bootstrapTable('removeAll');  
+      for (var i = 0; i < $data.length; i++){
+        if($data[i].statusUpload == '1' || $data[i].statusUpload == '成功'){
+          localSuccessAsync($data[i]);
+        }else{
+          var check = checkTableData($data[i]);
+          if(!check.status){
+            localAsync($data[i],check.msg);
+          }else{
+            uploadAsync($data[i]);
+          }
+        }
+      }
+    });
+
+    $(document).ready(function(){
+      /*渠道代码选择*/
+      if(!window.localStorage.winlink_transportmode){
+        getTransportMode();
+      }else{
+        transportModeList = transportMode2option(JSON.parse(window.localStorage.winlink_transportmode))
+      }
+      /*弹出提示框*/
+      layer.open({
+        type:'1',
+        content:'<div style="padding:4px;"><p>批量上传订单注意：</p><p>1.上传后可点击对字段进行修改<p><p>2.上传完毕后,有错误订单没有生成,可在修改后继续生成！系统会自动过滤已经生成的订单</p><p>3.上传后若错误太多，可导出后进行修改，然后导入继续生成</p></div>'
+      });
+    });
+    function checkTableData(data){
+        var check = checkEmpty(data.ConsigneeAddress1,'Address');
+        if(!check.status) return check;
+
+        check = checkEmpty(data.ConsigneeCity,'City');
+        if(!check.status) return check;
+
+        check = checkEmpty(data.ConsigneeName,'Name');
+        if(!check.status) return check;
+
+        check = checkEmpty(data.ConsigneePhone,'Phone')
+        if(!check.status) return check;
+        check = checkInt(data.ConsigneePhone,'Phone');
+        if(!check.status) return check;
+
+        check = checkServiceType(data.ServiceType,'Service');
+        if(!check.status) return check;
+
+        check = checkTransportMode(data.transportMode,'transportMode');
+        if(!check.status) return check;
+
+        check = checkWithBattery(data.WithBattery,'WithBattery');
+        if(!check.status) return check;
+
+
+        check = checkInt(data.ConsigneeTel,'Tel');
+        if(!check.status) return check;
+
+        check = checkEmpty(data.InAmt,'NcndAmt')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.Origin,'Org')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.noofpieces,'Pcs')
+        if(!check.status) return check;
+        check = checkInt(data.noofpieces,'Pcs')
+        if(!check.status) return check;
+
+        check = checkEmpty(data['Retail Code'],'Retail Code')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.ShipperRef,'RefNumber')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.TotalWeight,'TotalWeight')
+        if(!check.status) return check;
+        check = checkNumber(data.TotalWeight,'TotalWeight')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.ValueOfShipment,'Value')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.WithBattery,'WithBattery')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.Zipcode,'Zipcode')
+        if(!check.status) return check;
+        check = checkInt(data.Zipcode,'Zipcode')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.product,'Product')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.transportMode,'transportMode')
+        if(!check.status) return check;
+
+        check = checkEmpty(data.weight,'weight')
+        if(!check.status) return check;  
+
+        return {status:true,msg:'pass'};
+    }
+    function localSuccessAsync(data){
+      $.ajax({
+        url:'__ORDER__/UploadOrder/emptyAjax',
+        type:'get',
+        success:function(){
+          $('#DataTable').bootstrapTable('insertRow',{
+            index:$('#DataTable').bootstrapTable('getOptions').totalRows,
+            row:data
+          });
+        }
+      });      
+    }
+    function localAsync(data,msg){
+      $.ajax({
+        url:'__ORDER__/UploadOrder/emptyAjax',
+        type:'get',
+        success:function(){
+          data.msg = msg;
+          data.statusUpload = '2';
+          $('#DataTable').bootstrapTable('insertRow',{
+            index:$('#DataTable').bootstrapTable('getOptions').totalRows,
+            row:data
+          });
+        }
+      });      
+    }
+    function uploadAsync(data){
+      $.ajax({
+        url:'__ORDER__/UploadOrder/XHRIndex',
+        type:'post',
+        data:data,
+        dataType:'json',
+        success:function(res){
+          if(res.status){
+            data.statusUpload = '1';
+            data.msg = res.data;
+          }else{
+            data.statusUpload = '2';
+            data.msg = res.msg;
+          }      
+          $('#DataTable').bootstrapTable('insertRow',{
+            index:$('#DataTable').bootstrapTable('getOptions').totalRows,
+            row:data
+          });
+        }
+      });      
+    }
+});
+</script>
+</block>
+<block name="baseFunction">
+<include file="./Public/view/uploadIndexTable.html" uploaddataname="upload_order_data" />
+<script>
+var $total = 0;
+function process_wb(wb) {
+    var output = to_json(wb).Sheet1;
+    $total = output.length;
+    XHRTable(output);
+}
+function showColumn(){}
+function hideColumn(){}
+function checkEmpty(value,name){
+  if(!value){
+    return {status:false,msg:name+'不能为空'}
+  }else{
+    return {status:true}
+  }
+}
+function checkInt(value,name){
+  var preg = /^[0-9]*$/;
+  if(!preg.test(value)){
+    return {status:false,msg:name+'只能为整数'}
+  }else{
+    return {status:true}
+  }
+}
+function checkNumber(value,name){
+  var preg = /^[0-9.]*$/;
+  if(!preg.test(value)){
+    return {status:false,msg:name+'只能为数字'}
+  }else{
+    return {status:true}
+  }
+}
+function checkSpecialChar(value,name){
+  var preg = /^[0-9a-zA-Z]*$/;
+  if(!preg.test(value)){
+    return {status:false,msg:name+'不能含有特殊字符'}
+  }else{
+    return {status:true}
+  }
+}
+function checkTransportMode(value,name){
+  var transportModeLis = JSON.parse(window.localStorage.winlink_transportmode);
+  if(transportModeLis[parseInt(value)] == undefined){
+    return {status:false,msg:name+'不存在！'}
+  }else{
+    return {status:true}
+  }
+}
+function checkWithBattery(value,name){
+  if(value == '0' || value == '1'){
+    return {status:true};  
+  }else{
+    return {status:false,msg:name+'只能为0或1'}; 
+  }
+}
+function checkServiceType(value,name){
+  if(value == 'NOR' || value == 'NCND'){
+    return {status:true};
+  }else{
+    return {status:false,msg:name+'只能为NCND或NOR'};
+  }
+}
+</script>
+<script> 
+function getTransportMode(){
+  $.ajax({
+    url:'__ORDER__/UploadOrder/getTransportMode',
+    type:'post',
+    async:false,
+    dataType:'json',
+    success:function(res){
+      window.localStorage.winlink_transportmode = JSON.stringify(res);
+    }
+  });
+}
+function transportMode2option(data){
+  var source = [];
+  for (var i in data) {
+    source.push({value:data[i].transportMode,text:data[i].transportMode+':'+data[i].fromTips});
+  }
+  return source;
+}
+function statusUploadFormatter(_value){
+  if(!_value){
+    return '<font style="color:#01AAED">准备</font>';
+  }else if(_value == '1' || _value=="成功"){
+    return '<font style="color:#5FB878">成功</font>'
+  }else if(_value == '2'){
+    return '<font style="color:#FF5722">失败</font>'
+  }else{
+    return '<font style="color:#01AAED"><准备></font>'
+  }
+};
+function returnMsgFormatter(_value){
+  //layer.tips('只想提示地精准些', that)
+  return _value ? '<span title="'+_value+'">'+_value+'</span>' : '';
+}
+function idFormatter(value, row, index){
+    return  (index+1)+($total > 0 ? '/'+$total : '');
+}  
+function XHRTable($data=false){
+ var indexLoad = layer.load(2,loadStyle);
+ var columns = [
+    {
+      field:"Index",title:"ID",align:"center",valign:"middle",width:"60px",formatter:"idFormatter"
+    },
+    {
+      field:"statusUpload",title:"状态",align:"center",valign:"middle",width:"80px",formatter:"statusUploadFormatter"
+    },
+    {
+      field:"msg",title:"单号",align:"center",valign:"middle",width:"120px",formatter:"returnMsgFormatter"
+    },
+    {
+      field:"ShipperRef", title:"RefNumber",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "RefNumber",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'RefNumber');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    { 
+      field:"WithBattery",title:"WithBattery",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "select",
+                 "title": "WithBattery",
+                 "source":[
+                  {value:'0',text:'不带电'},
+                  {value:'1',text:'带电'}
+                 ],
+                 "validate":function(v){
+                    var check = checkEmpty(v,'WithBattery');
+                    if(!check.status) return check.msg;
+                 }
+               }
+    },
+    {
+      field:"ServiceType", title:"Service",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "select",
+                 "title": "Service",
+                 "source":[
+                  {value:'NOR',text:'预付'},
+                  {value:'NCND',text:'到付'}
+                 ],
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Service');
+                    if(!check.status) return check.msg;                }
+               }      
+    },
+    {
+      field:"InAmt",title:"NcndAmt", align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "NcndAmt",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'NcndAmt');
+                    if(!check.status) return check.msg;
+                 }
+               }
+    },
+    {
+      field:"TotalWeight",title:"TotalWeight",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "TotalWeight",
+                 "validate":function(v){
+                  var check = checkEmpty(v,'TotalWeight');
+                  if(!check.status) return check.msg;
+                  check = checkNumber(v,'TotalWeight');
+                  if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"product" ,title:"Product",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Product",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Weight');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"noofpieces" ,title:"Pcs",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Pcs",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Pcs');
+                    if(!check.status) return check.msg;
+                    var check = checkInt(v,'Pcs');
+                    if(!check.status) return check.msg;
+                 }
+               }     
+    },
+    { 
+      field:"customnote", title:"CustomNote",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "CustomNote",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'CustomNote');
+                    if(!check.status) return check.msg;
+                 }
+               }
+    },
+    {
+      field:"Consignee",title:"Company",align:"center",valign:"middle",width:"80px",
+      editable:{
+                 "type": "text",
+                 "title": "Company"
+               }
+    },
+    {
+      field:"ConsigneeName",title:"Name",align:"center",valign:"middle",width:"80px",
+      editable:{
+                 "type": "text",
+                 "title": "Name",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Name');
+                    if(!check.status) return check.msg;
+                 }
+         }
+    },
+    { 
+      field:"transportMode" ,title:"transportMode",align:"center",valign:"center",width:"150",
+      editable:{
+                "type": "select",
+                "title": "transportMode",
+                "source": transportModeList
+               }
+    },
+    {
+      field:"Destination", title:"Des",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Des",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Des');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"ConsigneeCity",title:"City",align:"center",valign:"middle",width:"80px",
+      editable:{
+                 "type": "text",
+                 "title": "City",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'City');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"ConsigneeAddress1",title:"Address",align:"center",valign:"middle",width:"80px",
+      editable:{
+                 "type": "text",
+                 "title": "Address",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Address');
+                    if(!check.status) return check.msg;
+                 }
+               }
+    },
+    {
+      field:"ConsigneePhone",title:"Phone",align:"center",valign:"middle",width:"80px",
+      editable:{
+                 "type": "text",
+                 "title": "Company",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Phone');
+                    if(!check.status) return check.msg;
+                    check = checkInt(v,'Phone');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"ConsigneeTel",title:"TEL",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "TEL",
+                 validate:function(v){
+                  var check = checkInt(v,'TEL');
+                  if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"Origin", title:"Org", align:"center", valign:"center",width:"100px",
+      editable:{
+                 "type": "select",
+                 "title": "Org",
+                 "source":[
+                  {value:'CZX',text:'CZX 从国内'},
+                  {value:'DXB',text:'DXB 从迪拜'}
+                 ],
+                 "validate":function(v){
+                  var check = checkEmpty(v,'Org');
+                  if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"Zipcode", title:"Zipcode",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Zipcode",
+                 "validate":function(v){
+                   var check = checkInt(v,'Zipcode');
+                   if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"AgentCode" ,title:"Agent",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Agent"
+               }
+    },
+    {
+      field:"GoodsDesc", title:"GoodsDesc",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "GoodsDesc",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'GoodsDesc');
+                    if(!check.status) return check.msg; 
+                 }
+               }      
+    },
+    {
+      field:"weight",title:"Weight",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Weight",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Weight');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"PCS", title:"GoodsPCS",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "GoodsPCS",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'GoodsPCS');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    {
+      field:"Description", title:"SKU",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "SKU",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'SKU');
+                    if(!check.status) return check.msg;
+                 }
+               }      
+    },
+    { 
+      field:"ValueOfShipment" ,title:"Value",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Value",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Value');
+                    if(!check.status) return check.msg;
+                 }
+               }
+    },
+    { 
+      field:"Retail Code" ,title:"Retail Code",align:"center",valign:"center",width:"100px",
+      editable:{
+                 "type": "text",
+                 "title": "Retail Code",
+                 "validate":function(v){
+                    var check = checkEmpty(v,'Retail Code');
+                    if(!check.status) return check.msg;
+                 }
+               }
+    },
+  ]
+  var initParam = {
+            height: getHeight(),
+            pagination: true,
+            showExport:true,//显示是否可以导出(这里只做开启用)
+            classes:'layui-table text-nowrap',
+            //clickToSelect: true,
+            pageSize: 25,
+            pageList: [25,50,100], 
+            columns:columns,
+            onResetView:function(){
+              layer.close(indexLoad);           
+            },
+            formatNoMatches: function(){
+               return '拖入此处上传！';
+            }
+  };
+  if($data){
+    initParam.data = $data;
+  }
+  $("#DataTable").bootstrapTable('destroy').bootstrapTable(initParam);
+}
+</script>
+</block>

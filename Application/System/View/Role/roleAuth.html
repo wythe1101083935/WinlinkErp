@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layui</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css"  media="all">
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_486269_3r76vasws2xrbe29.css"/>
+  <script src="__PUBLIC__/layui/layui.js"></script>
+</head>
+<body>
+<div id="toolbar" style="padding:10px;height:57px;">
+  <button type="button" class="layui-btn" id="confirm">确认</button>
+</div>
+<div id="menu" class="grid">
+</div> 
+<script id="view" type="text/html">
+<table class="layui-table">
+    <thead>
+        <tr>
+            <th>名称</th>
+            <th>编码</th>
+            <th>URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{# layui.each(d.rows,function(index,r){ }}
+        <tr>
+            <td><input type="checkbox" style="margin-right:10px;" value="{{r.id}}" {{r.checked}}/><i class="{{r.iconcls}}"></i><span  style="margin-left:10px;">{{r.text}}</span></td>
+            <td>{{r.name}}</td>
+            <td>{{r.url}}</td>
+        </tr>
+        {{# }); }}
+    </tbody>
+</table>
+</script> 
+</body>
+<script>
+var menuList = JSON.parse('{$menuList}');
+var role_id = {$Think.get.id};
+layui.config({
+    base: '__PUBLIC__/layui/extend/'
+}).use(['laytpl', 'treegrid','layer'], function () {
+    var laytpl = layui.laytpl,
+        treegrid = layui.treegrid,
+        $ = layui.jquery,
+        layer = layui.layer;
+    treegrid.config.render = function (viewid, data) {
+        var view = document.getElementById(viewid).innerHTML;
+        return laytpl(view).render(data) || '';
+    };
+    var rows = menuList;
+    treegrid.createNew({
+        elem: 'menu',
+        view: 'view',
+        data: { rows: rows },
+        parentid: 'pid',
+        singleSelect: false
+    }).build();
+    $('#confirm').click(function(){
+      var index = layer.msg('数据提交中，请稍候',{icon: 16,time:false,shade:0.8});  
+      var auth = [];
+      $('input:checked').each(function(){
+        auth[auth.length] = $(this).val();
+      });
+      $.ajax({
+        url:'__SYSTEM__/Role/updateRoleAuth',
+        type:'post',
+        async:true,
+        data:{id:role_id,auth:auth},
+        success:function(res){
+          if(res.status){
+            layer.close(index);
+            layer.msg(res.msg);
+            setTimeout(function(){
+              parent.location.reload();
+            },500);
+          }else{
+            layer.close(index);
+            layer.msg(res.msg);
+          }
+        }
+      });
+    });
+});
+</script>
+</script>
+</html>

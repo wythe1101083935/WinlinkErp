@@ -1,0 +1,32 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<div style="margin-right:10%;margin-top:30px;">
+	<form class="layui-form" id="DataForm">
+		<div class="layui-form-item">
+			<label class="layui-form-label">原密码</label>
+			<div class="layui-input-block">			
+					<input type="password" name="old_pass" class="layui-input"/>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">新密码</label>
+			<div class="layui-input-block">			
+					<input type="password" name="new_pass" class="layui-input" />
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">重复密码</label>
+			<div class="layui-input-block">			
+					<input type="password" name="new_repass" class="layui-input"/>
+			</div>
+		</div>
+	</form>
+</div>
+</block>
+<block name="baseScript">
+<script>
+	layui.use(['form'],function(){
+		var form = layui.form;
+	});
+</script>
+</block>

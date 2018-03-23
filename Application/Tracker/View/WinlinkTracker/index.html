@@ -1,0 +1,192 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="addTracker">增加</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="editTracker">修改</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="deleteTracker">删除</a></li>
+    </ul> 
+    <form class="layui-layout-left layui-form" style="padding:10px;left:220px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input" id="keyword" placeholder="名称/代码/说明/城市">         
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseFields">
+          <th class="check" data-checkbox="true"></th>
+          <th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+          <th data-field="names" data-width="100" data-align="center">名称</th> 
+          <th data-field="code" data-width="100" data-align="center" data-sortable="true">代码</th> 
+          <th data-field="remarks" data-width="100" data-align="center">说明</th> 
+          <th data-field="city" data-width="120" data-align="center">所在城市</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,$ = layui.jquery;
+    $('#keyword').keydown(function(e){
+      if(e.keyCode == 13){
+        $('#search').click();
+        return false;
+      }
+      return ;
+    });
+    $('#addTracker').click(function(){
+        layer.open({
+            type:2,
+            title:'增加轨迹',
+            content:'__TRACKER__/WinlinkTracker/add',
+            btn:['确认','取消'],
+            area:['500px','340px'],
+            btn1:function(index,layero){
+                var Value = layero.find('iframe').contents().find('#DataForm').serializeArray();
+                var FormValue = {};    
+                for (var i = 0; i < Value.length; i++) {
+                  FormValue[Value[i].name] = Value[i].value;
+                }
+                $.ajax({
+                    url:'__TRACKER__/WinlinkTracker/insert',
+                    type:'post',
+                    data:FormValue,
+                    success:function(res){
+                        layer.msg(res.msg);
+                        if(res.status){
+                            setTimeout(function(){
+                              window.location.reload();
+                            },500);
+                        }
+                    }
+                });
+            },
+            btn2:function(index){
+            }
+        }); 
+    });
+    $('#editTracker').click(function(){
+        var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+        if(selectedRows.length!=1){
+            layer.msg('编辑数量错误！请只选择一个轨迹！');
+            return false;
+        }        
+        layer.open({
+            type:2,
+            title:'修改轨迹',
+            content:'__TRACKER__/WinlinkTracker/edit/id/'+selectedRows[0].id,
+            btn:['确认','取消'],
+            area:['500px','340px'],
+            btn1:function(index,layero){
+                var Value = layero.find('iframe').contents().find('#DataForm').serializeArray();
+                var FormValue = {};    
+                for (var i = 0; i < Value.length; i++) {
+                  FormValue[Value[i].name] = Value[i].value;
+                }
+                console.log(FormValue);
+                $.ajax({
+                    url:'__TRACKER__/WinlinkTracker/update',
+                    type:'post',
+                    data:FormValue,
+                    success:function(res){
+                        layer.msg(res.msg);
+                        if(res.status){
+                            setTimeout(function(){
+                              window.location.reload();
+                            },500);
+                        }
+                    }
+                });
+            },
+            btn2:function(index){
+            }
+        }); 
+    });
+    $('#deleteTracker').click(function(){
+      layer.msg('暂不启用！');
+      return;
+      var selectedRows = $('#DataTable').bootstrapTable('getSelections');
+      if(selectedRows.length <1 ){
+        layer.msg('未选择轨迹！');
+        return ;
+      }
+      var id = '';
+      for (var i = 0; i < selectedRows.length; i++) {
+        id += selectedRows[i].id+','
+      }
+      layer.confirm('确定删除这些轨迹吗！',function(){
+         $.ajax({
+          url:'__TRACKER__/WinlinkTracker/delete',
+          type:"post",
+          async:true,
+          data:{id:id},
+          dataType:'json',
+          success:function(res){
+            layer.msg(res.msg);
+            if(res.status){
+              setTimeout(function(){
+                window.location.reload();
+              },500);
+            }
+          }
+        });       
+      });
+
+    })
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+function XHRTable(selectTime = false, status = false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__TRACKER__/WinlinkTracker/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'id',
+                  keyword:$('#keyword').val(),
+              };
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

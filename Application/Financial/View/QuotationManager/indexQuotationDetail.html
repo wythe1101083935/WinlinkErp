@@ -1,0 +1,90 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+	<div style="padding:0px;left:0px;" id="DataBody">
+	   <table class="layui-hide" id="DataTable" lay-filter="DataTable"></table>    
+	</div>	
+</block>
+<block name="baseScript">
+<script>
+layui.use(['table','element'],function(){
+  var table = layui.table
+      ,element = layui.element
+      ,$ = layui.jquery;
+
+table.on('edit(DataTable)', function(obj){
+	var value = obj.value //得到修改后的值
+	,data = obj.data //得到所在行所有键值
+	,field = obj.field; //得到字段
+	var id = data.id;
+	$.ajax({
+	  url:'__FINANCIAL__/QuotationManager/updateQuotationDetail',
+	  type:'post',
+	  data:{id:id,value:value,field:field},
+	  success:function(res){
+	  	if(!res.status){
+	  		console.log(res.status);
+	  		layer.msg(res.msg);
+	  	}
+	  }
+	});
+});
+$('#search,#search1').click(function(){
+  XHRTable();
+});
+$(document).ready(function(){
+  XHRTable();
+});
+function XHRTable(){
+  table.render({
+    url:'__FINANCIAL__/QuotationManager/XHRquotationDetail',
+    elem:'#DataTable',
+    page:false,
+    height:$(window).height(),
+  	//limit:5,
+  	//limits:[5,10,20],
+    method:'post',
+/*	request: {
+	  pageName: 'page' //页码的参数名称，默认：page
+	  ,limitName: 'nums' //每页数据量的参数名，默认：limit
+	}, */             
+    where:{
+    	rule_id:'{$Think.get.id}'
+    },
+    cols:[
+             [
+	             {
+	             	 field:"fee_min",
+	                 title: "最小重量",
+	                 valign:"middle",
+	                 align:"center",
+	                 edit:'text'
+	             },
+	             {
+	             	 field:"fee_max",
+	                 title: "最大重量",
+	                 valign:"middle",
+	                 align:"center",
+	                 edit:'text'
+	             },
+	             {
+	             	 field:"fee_price",
+	                 title: "价格",
+	                 valign:"middle",
+	                 align:"center",
+	                 edit:'text'
+	             },
+	             {
+	             	 field:"step",
+	                 title: "步进",
+	                 valign:"middle",
+	                 align:"center",
+	                 //edit:'text'
+	             }	            
+
+             ]
+         ],
+  });  
+}
+});
+</script>
+</block>

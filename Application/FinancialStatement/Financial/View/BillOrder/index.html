@@ -1,0 +1,374 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;" title="单日时间按照实际出库时间计算(昨日12点至今日12点)">出库时间</a>
+        <dl class="layui-nav-child">
+          <foreach name="timeDays" item="val">
+            <dd data-time="{$val.startTime}~{$val.endTime}" class="quickTime"><a href="javascript:;">{$val.name}</a></dd>
+          </foreach> 
+        </dl>        
+      </li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">订单状态</a>
+        <dl class="layui-nav-child">
+          <foreach name="orderStatus" item="val">
+            <dd data-action="{$val.action}" data-range="{$val.range}" class="orderStatus"><a href="javascript:;">{$val.statusName}</a></dd>
+          </foreach> 
+        </dl>        
+      </li>
+    </ul> 
+    <form class="layui-layout-left" style="padding:10px;left:330px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入单号" id="awbno" class="layui-textarea" style="min-height:40px;height:40px;max-height:40px;">{$awbnos}</textarea>
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="caculate" >计算总金额</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="addBatch">添加结算单</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;" id="all">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+        <div class="layui-form-item">  
+            <div class="layui-inline">
+              <label class="layui-form-label">Time(C)</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input" id="timeOut" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">Time(P)</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input" id="timeFinish" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">USER</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Country</label>
+                <div class="layui-input-inline">
+                    <select name="modules" id="country" lay-search="">
+                        <option value="0">所有</option>
+                        <option value="SA">沙特</option>
+                        <option value="OM">阿曼</option>
+                        <option value="AE">阿联酋(旧)</option>
+                        <option value="AE1">阿联酋</option>
+                        <option value="AE2">阿联酋(偏远)</option>
+                        <option value="BH">巴林</option>
+                        <option value="EG">埃及</option>
+                        <option value="QA">卡塔尔</option>
+                        <option value="IR">伊朗</option>
+                        <option value="KWT">科威特</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <input type="button" class="layui-btn" id="search1" value="查询"/>
+                <input type="reset" class="layui-btn" id="" value="重置"/>
+            </div>
+        </div>          
+</block>
+<block name="baseFields">
+<th class="check" data-checkbox="true"></th>
+<th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+<th data-field="time" data-width="110" data-align="center" data-formatter="timeFormatter">时间</th>
+<th data-field="username" data-width="90"  data-align="center" data-sortable='true'>客户名</th>
+<th data-field="awbno" data-width="110"  data-align="center" data-formatter="awbFormatter">单号</th>   
+<th data-field="userrefid" data-width="150"  data-align="center">原单号</th>
+<th data-field="refcode" data-width="140"  data-align="center">转单号</th>
+<th data-field="consigneecountry" data-align="center" data-width="70" data-sortable='true'>国家</th>
+<th data-field="consigneecity" data-align="center" data-width="110">地区</th>
+<th data-field="weight" data-align="center" data-width="70">重量</th>
+<th data-field="cweight" data-align="center" data-width="100">实际重量</th>
+<th data-field="vweight" data-align="center" data-width="100">T体积重量</th>
+<th data-field="goods_value" data-align="center" data-width="100" title="USD">申报价值</th>
+<th data-field="inamt" data-align="center" data-width="100">COD金额</th>
+<th data-field="inamt_unit" data-align="center" data-width="100">COD单位</th>
+<th data-field="bill_cacuweight" data-align="center" data-width="100">T计算重</th>
+<th data-field="cost_vweight" data-align="center" data-width="100">C体积重</th>
+<th data-field="cost_cacuweight" data-align="center" data-width="100">C计算重</th>
+<th data-field="transer_fee" data-align="center" data-width="70" data-editable='{
+            "type": "text",
+            "title": "应收"
+          }'>应收</th>
+<!--  data-editable='{
+            "type": "text",
+            "title": "应收"
+          }' -->
+<th data-field="transer_fee_unit" data-align="center" data-width="90" data-editable='{
+             "type": "select",
+             "title": "应收单位",
+             "emptytext":"-",
+             "source":[
+               {"text":"RMB","value":"RMB"},
+               {"text":"USD","value":"USD"},       
+               {"text":"HKD","value":"HKD"}       
+             ]}'>应收单位</th>
+<!-- data-editable='{
+             "type": "select",
+             "title": "应收单位",
+             "emptytext":"-",
+             "source":[
+               {"text":"RMB","value":"RMB"},
+               {"text":"USD","value":"USD"},       
+               {"text":"HKD","value":"HKD"}       
+             ]}' -->
+<th data-field="cost_fee" data-align="center" data-width="70">应付</th>
+<th data-field="cost_fee_unit" data-align="center" data-width="90">应付单位</th>
+<th data-field="tariff_fee" data-align="center" data-width="70" data-editable='{
+             "type": "text",
+             "title": "关税"
+           }'>关税</th>
+<!-- data-editable='{
+             "type": "text",
+             "title": "关税"
+           }' -->
+<th data-field="tariff_fee_unit" data-align="center" data-width="90" data-editable='{
+             "type": "select",
+             "title": "关税单位",
+             "emptytext":"-",
+             "source":[
+               {"text":"RMB","value":"RMB"},
+               {"text":"USD","value":"USD"},       
+               {"text":"HKD","value":"HKD"}       
+             ]
+           }'>关税单位</th>
+<!-- data-editable='{
+             "type": "select",
+             "title": "关税单位",
+             "emptytext":"-",
+             "source":[
+               {"text":"RMB","value":"RMB"},
+               {"text":"USD","value":"USD"},       
+               {"text":"HKD","value":"HKD"}       
+             ]
+           }' -->
+<th data-field="status_flag" data-align="center" data-width="100" data-formatter="stFormatter">订单状态</th>
+<th data-field="finish_time" data-align="center" data-width="100" data-formatter="timeFormatter">完成日期</th>
+</block>
+<block name="baseScript">
+<link href="__PUBLIC__/css/bootstrap-editable.min.css" rel="stylesheet">
+<style>
+  .editable-click, a.editable-click, a.editable-click:hover {
+    text-decoration: none;
+    border-bottom: dashed 0px #08c;
+}
+</style>
+<script src="__PUBLIC__/js/bootstrap-editable.min.js"></script>
+<script src="__PUBLIC__/js/bootstrap-table-editable.min.js"></script>
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#timeOut',type:'datetime',range:'~',theme:'#393D49'});
+    laydate.render({elem:'#timeFinish',type:'datetime',range:'~',theme:'#393D49'});
+    $('#awbno').keydown(function(e){
+      if(e.keyCode == 13){
+        $('#search').click();
+      }
+    });
+    $('#caculate').click(function(){
+      var total = $('#DataTable').bootstrapTable('getSelections');
+      var totalInamt = 0,totalTranserfee = 0,totalCostFee = 0,totalTariff = 0;
+      for (var i = 0; i < total.length; i++) {
+        totalInamt += parseFloat(total[i].inamt);
+        totalTranserfee += parseFloat(total[i].transer_fee);
+        totalCostFee += parseFloat(total[i].cost_fee);
+        totalTariff += parseFloat(total[i].tariff_fee==undefined ? 0 :total[i].tariff_fee);
+      }
+      var tableData = ['<table class="layui-table">',
+                        '<tr><td>总应收:</td><td>'+totalTranserfee+'</td></tr>',
+                        '<tr><td>总派送成本:</td><td>'+totalCostFee+'</td></tr>',
+                        '<tr><td>总COD:</td><td>'+totalInamt+'</td></tr>',
+                        '<tr><td>总关税:</td><td>'+totalTariff+'</td></tr>',
+                      '</table>'];
+
+      layer.open({
+        title:'计算总数',
+        content:tableData.join('')
+      });
+    });
+    $('#addBatch').click(function(){
+      var select = $('#DataTable').bootstrapTable('getSelections');
+      if(select.length<1){
+        layer.msg('未选中任何单号！');
+        return false;
+      }
+      var awbnos = '';
+      for (var i = 0; i < select.length; i++) {
+        awbnos += select[i].awbno + ',';
+      }
+      var index = layer.prompt({
+                      formType: 2,
+                      value: '',
+                      title: '请输入结算单名称',
+                      area: ['400px', '30px'] //自定义文本域宽高
+                      }, function(value, index, elem){
+                          if(!value){
+                            layer.msg('结算单名称不能为空！');
+                            return false;
+                          }
+                          $.ajax({
+                            url:'__FINANCIAL__/BillOrder/addBatch',
+                            type:'post',
+                            data:{awbnos:awbnos,batch_name:value},
+                            dataType:'json',
+                            success:function(res){
+                              console.log(res);
+                              layer.msg(res.msg);
+                              layer.close(index);
+                            }
+                      });
+    
+  });
+
+    });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+var exportAllStatus = false;
+function XHRTable(selectTime = false, status = false){
+/*var columns = [
+  [
+    {field:"",checkbox:"true"},
+    {field:"id",width:"40",align:"center",formatter:"indexFormatter",title:"ID"},
+    {field:"time",width:"90",align:"center",formatter:"timeFormatter",title:"时间"},
+    {field:"username",width:"90" ,align:"center",sortable:'true',title:"客户名"},
+    {field:"awbno",width:"110" ,align:"center",formatter:"awbFormatter",title:"单号"},   
+    {field:"userrefid",width:"150" ,align:"center",title:"原单号"},
+    {field:"refcode",width:"140" ,align:"center",title:"转单号"},
+    {field:"consigneecountry",align:"center",width:"70",sortable:'true',title:"国家"},
+    {field:"consigneecity",align:"center",width:"110",title:"地区"},
+    {field:"weight",align:"center",width:"70",title:"重量"},
+    {field:"cweight",align:"center",width:"100",title:"实际重量"},
+    {field:"vweight",align:"center",width:"100",title:"T体积重量"},
+    {field:"inamt",align:"center",width:"100",title:"COD金额"},
+    {field:"inamt_unit",align:"center",width:"100",title:"COD单位"},
+    {field:"bill_cacuweight",align:"center",width:"100",title:"T计算重"},
+    {field:"cost_vweight",align:"center",width:"100",title:"C体积重"},
+    {field:"cost_cacuweight",align:"center",width:"100",title:"C计算重"},
+    {field:"transer_fee",align:"center",width:"70",formatter:emptyFormatter,editable:{
+                 "type": "text",
+                 "title": "应收"
+               },title:"应收"},
+    {field:"transer_fee_unit",align:"center",width:"90",editable:{
+                 "type": "select",
+                 "title": "应收单位",
+                 "emptytext":"-",
+                 "source":[
+                   {"text":"RMB","value":"RMB"},
+                   {"text":"USD","value":"USD"}       
+                 ]
+               },title:"应收单位"},
+    {field:"cost_fee",align:"center",width:"70",title:"应付"},
+    {field:"cost_fee_unit",align:"center",width:"90",title:"应付单位"},
+    {field:"tariff_fee",align:"center",width:"70",editable:{
+                 "type": "text",
+                 "title": "关税"
+               },title:"关税"},
+    {field:"tariff_fee_unit",align:"center",width:"90",editable:{
+                 "type": "select",
+                 "title": "关税单位",
+                 "emptytext":"-",
+                 "source":[
+                   {"text":"RMB","value":"RMB"},
+                   {"text":"USD","value":"USD"}       
+                 ]
+               },title:"关税单位"},
+    {field:"status_flag",align:"center",width:"100",formatter:"stFormatter",title:"订单状态"},
+    {field:"finish_time",align:"center",width:"100",formatter:"timeFormatter",title:"完成日期"}
+  ]
+];
+*/
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__FINANCIAL__/BillOrder/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table',
+          //columns:columns,
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'time',
+                  awbno:$('#awbno').val(),
+                  timeOut:$('#timeOut').val(),
+                  timeFinish:$('#timeFinish').val(),
+                  username:$('#username').val(),
+                  country:$('#country').val()
+              };
+              if(selectTime){
+                param.timeOut = selectTime;
+              }
+              if(status){
+                param.orderStatus = status;
+              }
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          },
+          onEditableSave:function(field,row){
+            $.ajax({
+              url:'__FINANCIAL__/BillOrder/update',
+              type:'post',
+              async:true,
+              data:{field:field,row:row},
+              dataType:'json',
+              success:function(res){
+                layer.msg(res.msg);
+                /*if(!res.status){
+                  setTimeout(function(){
+                    window.location.reload();
+                  },500);
+                }*/
+              }
+            });
+          }
+      });     
+}
+</script>
+</block>

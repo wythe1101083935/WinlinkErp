@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>WinLink</title>
+    <link rel='Shortcut Icon' type='image/x-icon' href='__PUBLIC__/win10-ui/img/windows.ico'>
+<script type="text/javascript">
+  var $home = '__HOME__',$public = '__PUBLIC__';
+</script>
+    <script type="text/javascript" src="__PUBLIC__/win10-ui/js/jquery-2.2.4.min.js"></script>
+    <link href="__PUBLIC__/win10-ui/css/animate.css" rel="stylesheet">
+    <script type="text/javascript" src="__PUBLIC__/win10-ui/component/layer-v3.0.3/layer/layer.js"></script>
+    <link rel="stylesheet" href="__PUBLIC__/win10-ui/component/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link href="__PUBLIC__/win10-ui/css/default.css" rel="stylesheet">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_486269_g2gy01as76n4gqfr.css"/>
+    <script type="text/javascript" src="__PUBLIC__/win10-ui/js/win10.js"></script>
+    <style>
+        * {
+            font-family: "Microsoft YaHei", 微软雅黑, "MicrosoftJhengHei", 华文细黑, STHeiti, MingLiu
+        }
+        /*磁贴自定义样式*/
+        .win10-block-content-text {
+            line-height: 44px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .layui-layer-title{
+            border-bottom:none;
+        }
+    </style>
+    <script>
+        Win10.onReady(function () {
+            //设置壁纸
+            Win10.setBgUrl({
+                main:'__PUBLIC__/win10-ui/img/wallpapers/main.jpg',
+                mobile:'__PUBLIC__/win10-ui/img/wallpapers/mobile.jpg',
+            });
+
+            Win10.setAnimated([
+                'animated flip',
+                'animated bounceIn',
+            ], 0.01);
+            //Win10.openUrl('__HOME__/Index/messageIndex','聊天窗口',[['300px','570px'],'rt']);//
+            //Win10.newMsg('管理界面','hahahahaha');
+           /* setTimeout(function(){              
+            },300);*/
+            /*
+            */;
+            /*setTimeout(function () {
+                Win10.openUrl('//win10ui.yuri2.cn/src/broadcast.html','<i class="fa fa-newspaper-o icon red"></i><a href="http://api.winlinklogistics.com">点此返回旧系统</a>',[['300px', '380px']])
+            },1000);*/
+            /*setTimeout(function () {
+                layer.open({
+                    type:1,
+                    title:'新系统上线',
+                    area:['500px','300px'],
+                    content:'<div style="text-align:left;padding:20px;"><p>功能简要说明</p><p>1.系统菜单位于左下角</p><p>2.可右击菜单栏的选项将其加入桌面</p><p>3.右键桌面可以添加外部系统或网页桌面图标</p><p><a style="color:#1E9FFF;text-decoration-line: none;" href="http://api.winlinklogistics.com">点此返回旧系统</a></p></div>'
+                });
+            },1000);*/
+
+        });
+    </script>
+</head>
+<body>
+<div id="win10" onfocus="">
+    <div class="desktop">
+        <div id="win10-shortcuts" class="shortcuts-hidden">
+            <foreach name="deskList" item="val">
+            <div class="shortcut" onclick="Win10.openUrl('{$val.url}','{$val.text}')" data-id="{$val.desk_id}">
+                <img class="icon" src="__PUBLIC__/win10-ui/img/icon/{$val.menu_img}"/>
+                <div class="title">{$val.text}</div>
+            </div>
+            </foreach>
+        </div>
+        <div id="win10-desktop-scene"></div>
+    </div>
+    <div id="win10-menu" class="hidden">
+        <div class="list win10-menu-hidden animated animated-slideOutLeft">
+            <foreach name="menuList" item="val">
+                <eq name="val.level" value="1">
+                    <div class="item">
+                        <i class="icon fa fa-fw {$val.iconcls}"></i> <span>{$val.text}</span>
+                    </div>
+                </eq>
+                <eq name="val.level" value="2">
+                    <div class="sub-item menuItem"  data-id="{$val.id}" onclick="Win10.openUrl('{$val.url}','{$val.text}')">{$val.text}</div>
+                </eq>
+            </foreach>
+            <div class="item" onclick=" Win10.exit();"><i class="black icon fa fa-power-off fa-fw"></i>关闭</div>
+        </div>
+        <div class="blocks">
+            <div class="menu_group">
+                <div class="title">
+                    个人信息
+                </div>
+                <div loc="1,1" size="4,2" class="block">
+                    <div class="content purple" style="font-size: 30px;line-height: 88px;text-align: center" onclick="Win10.openUrl('__HOME__/Index/userInfo','{$Think.session.loginInfo.username}')">
+                        <i class="fa fa-user fa-fw"></i>发件信息
+                    </div>
+                </div>
+                <div loc="5,1" size="2,1" class="block">
+                    <div class="content" onclick="">
+                        <div style="text-align:center;line-height:44px;" onclick="changePass()">修改密码</div>            
+                    </div>
+                </div>
+               <div loc="5,2" size="2,1" class="block">
+                   <div class="content red">
+                       <div style="text-align:center;line-height:44px;"><a style="text-decoration-line:none;color:white" href="http://api.winlinklogistics.com">使用旧系统</a></div>   
+                   </div>
+               </div>
+                <foreach name="rate" item="val" key="key">
+                <div loc="1,{$key+3}" size="6,1" class="block">
+                    <div class="content blue" style="line-height:44px;text-align:center" onclick="Win10.openUrl('{$val.url}','{$val.rate_from}to{$val.rate_to}')">
+                        {$val.rate_from} To {$val.rate_to} :<span>{$val.rate_value}</span>
+                    </div>
+                </div>                    
+                </foreach>
+            </div>
+        
+            <div class="menu_group">
+               <div class="title">
+                    站外信息
+                </div>
+                <div loc="1,1" size="6,4" class="block">
+                    <div class="content blue cover" style="font-size: 30px;line-height: 176px;text-align: center">
+                        <i class="fa fa-cloud fa-fw"></i> 天气
+                    </div>
+                    <div class="content detail" style="background-color: rgb(46,147,217)">
+                        <iframe src="//www.seniverse.com/weather/weather.aspx?uid=U43DF172E7&cid=CHBJ000000&l=&p=SMART&a=1&u=C&s=13&m=2&x=1&d=1&fc=&bgc=2E93D9&bc=&ti=0&in=0&li=" frameborder="0" scrolling="no" width="264" height="300" allowTransparency="true"></iframe>
+                    </div>
+                </div>
+                <div loc="1,5" size="6,3" class="block">
+                    <div class="content red detail" >
+                        <iframe style="margin-top: 10px" frameborder="no" border="0" marginwidth="0" marginheight="0" width=264 height=110 src="//music.163.com/outchain/player?type=2&id=110771&auto=0&height=90"></iframe>
+                    </div>
+                    <div class="content red cover">
+                        <img width="264" style="position: relative;top: -50px;" src="__PUBLIC__/win10-ui/img/presentation/wangyiyun.gif" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="win10-menu-switcher"></div>
+    </div>
+    <div id="win10_command_center" class="hidden_right">
+        <div class="title">
+            <h4 style="float: left">消息中心 </h4>
+            <span id="win10_btn_command_center_clean_all">全部清除</span>
+        </div>
+        <div class="msgs"></div>
+    </div>
+    <div id="win10_task_bar">
+        <div id="win10_btn_group_left" class="btn_group">
+            <div id="win10_btn_win" class="btn"><span class="fa fa-windows"></span></div>
+            <div class="btn" id="win10-btn-browser"><span class="fa fa-internet-explorer"></span></div>
+        </div>
+        <div id="win10_btn_group_middle" class="btn_group"></div>
+        <div id="win10_btn_group_right" class="btn_group">
+            <div class="btn" id="win10_btn_time">
+                <!--0:00<br/>-->
+                <!--1993/8/13-->
+            </div>
+            <div class="btn" id="win10_btn_command"><span id="win10-msg-nof" class="fa fa-comment-o"></span></div>
+            <div class="btn" id="win10_btn_show_desktop"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+function changePass(){
+    var index = layer.open({
+        type:2,
+        title:Win10.lang('修改密码','Edit Pass'),
+        content:$home+'/Index/indexChangePass',
+        btn:[Win10.lang('确认','Confirm'),Win10.lang('取消','Cancel')],
+        area:['500px','300px'],
+        btn1:function(index,layero){
+            var Value = layero.find('iframe').contents().find('#DataForm').serializeArray();
+            var FormValue = {};
+            for (var i = 0; i < Value.length; i++) {
+                FormValue[Value[i].name] = Value[i].value;
+            }
+            if(FormValue.new_pass != FormValue.new_repass){
+                layer.msg('两次输入的密码不一致！');
+                return false;
+            }
+            $.ajax({
+                url:$home+'/Index/changePass',
+                type:'post',
+                data:FormValue,
+                success:function(res){
+                    layer.msg(res.msg);
+                    if(res.status){
+                        layer.close(index);;
+                    }
+                }
+            });
+        },
+        btn2:function(index){
+        }
+    });    
+}
+/*function resetAPI(){
+    layer.open({
+        type:2,
+        title:Win10.lang('重置API','Reset API'),
+        content:$home+'/Index/indexResetAPI',
+        btn:[Win10.lang('确认','Confirm'),Win10.lang('取消','Cancel')],
+        area:['500px','300px'],
+        btn1:function(index,layero){
+            var Value = layero.find('iframe').contents().find('#DataForm').serializeArray();
+            var FormValue = {};
+            for (var i = 0; i < Value.length; i++) {
+                FormValue[Value[i].name] = Value[i].value;
+            }
+            $.ajax({
+                url:$home+'/Index/resetAPI',
+                type:'post',
+                data:FormValue,
+                success:function(res){
+                    layer.msg(res.msg);
+                }
+            });
+        },
+        btn2:function(index){
+        }
+    });
+}*/
+</script>
+</html>

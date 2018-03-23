@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layui</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css"  media="all">
+<link rel="stylesheet" href="__PUBLIC__/layui/css/single.css">
+<link href="__PUBLIC__/css/bootstrap.min.css" rel="stylesheet">
+<link href="__PUBLIC__/css/bootstrap-table.min.css" rel="stylesheet">
+<script src="__PUBLIC__/js/jquery-1.8.3.min.js"></script>
+<script src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script src="__PUBLIC__/js/bootstrap-table.min.js"></script>
+<script src="__PUBLIC__/js/bootstrap-table-export.min.js"></script>
+<script src="__PUBLIC__/js/tableExport.min.js"></script>
+<script src="__PUBLIC__/js/bootstrapTableFieldFormatter.min.js"></script>
+<script src="__PUBLIC__/layui/layui.js"></script>
+<style>
+a {
+    color: #333;
+}
+td a{
+  display:block;
+  width:100%;
+  height:100%;
+}
+td{
+overflow: hidden;/*内容超出后隐藏*/  
+text-overflow: ellipsis;/* 超出内容显示为省略号*/  
+}
+a:focus,a:hover{text-decoration:none}
+}
+.layui-form-item .layui-inline-right {
+  margin-bottom: 5px;
+  float:right;
+}
+.fixed-table-container{
+    position: relative;
+    clear: none; 
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+}
+.fixed-table-header{
+  margin-right:16px;
+}
+.pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active > span, .pagination > .active > span:focus, .pagination > .active > span:hover{
+  color:black;
+  background-color:#fff;
+ /*  border-color:#fff;  */
+  border-color:rgba(49, 49, 50, 0.94);
+}
+.pagination > li > a:focus, .pagination > li > a:hover, .pagination > li > span:focus, .pagination > li > span:hover {
+    z-index: 3;
+    color: #fff;
+    background-color:rgba(49, 49, 50, 0.94);
+    /* border-color:#fff; */
+    border-color:rgba(49, 49, 50, 0.94);
+}
+.pagination > li > a, .pagination > li > span{
+  color:rgba(255,255,255,.7); 
+  background-color:rgba(49, 49, 50, 0.94);
+  border-color:rgba(49, 49, 50, 0.94);
+}
+.pagination{
+  display:inline-block;
+  padding-left:0;
+  margin:7px 0;
+  border-radius:4px
+}
+.pagination > .disabled > a, .pagination > .disabled > a:focus, .pagination > .disabled > a:hover, .pagination > .disabled > span, .pagination > .disabled > span:focus, .pagination > .disabled > span:hover {
+    color: rgba(255,255,255,.7);
+    cursor: not-allowed;
+    background-color: rgba(49, 49, 50, 0.94);
+    border-color: rgba(49, 49, 50, 0.94);
+}
+.dropdown-menu > .active > a, .dropdown-menu > .active > a:focus, .dropdown-menu > .active > a:hover {
+    color: #fff;
+    text-decoration: none;
+    background-color:rgba(49, 49, 50, 0.94);
+    outline: 0;
+}
+.win10-btn-toolbar > span {
+    font-size: 16px !important;
+    color: rgb(255, 255, 255);
+}
+.layui-table, .layui-table-view{
+  margin:0px;
+}
+.table{
+    table-layout: fixed;
+}
+td a:hover{
+  opacity: .8;
+  cursor:pointer;
+  color: white;
+  background-color:#009688;
+}
+#advancedSearch{
+  overflow:visible;
+}
+</style>
+</head>
+<body class="layui-layout-body" id="baseBody">
+<div class="layui-layout layui-layout-admin">
+<block name="hideToolbarStart">
+  <div class="layui-header" style="background-color:rgba(49, 49, 50, 0.94);" id="toolbar">
+    <span display="display:none" id="WindowResize"></span>
+</block>
+    <block name="baseToolbar"></block>
+<block name="hideToolbarEnd">
+  </div> 
+</block>
+<div id="advancedSearch" style="margin-left:10%;width:80%;margin-top:0px;padding:10px;background-color:#f2f2f2;display:none;position:absolute;z-index:998;">
+    <form class="layui-form layui-form-pane" style="width:78%;margin-left:10%;margin-right:12%" id="baseForm" lay-filter="baseForm">
+    <block name="baseAdvancedSearch"></block>
+    </form> 
+    <div style="text-align:center"><span class="updown up"><i class="layui-icon">&#xe619;</i></span></div>
+</div>
+<div style="padding:0px;left:0px;" id="DataBody">
+    <table id="DataTable" class="table">
+        <thead>
+        <tr>
+        <block name="baseFields"></block>               
+        </tr>
+        </thead>
+    </table>    
+</div>
+<div class="layui-footer" style="left:0px;height:40px;color:white;background-color:rgba(49, 49, 50, 0.94);">
+<div class="fixed-table-pagination"></div>
+</div>
+</div>
+</body>
+<script>
+  var loadStyle = {shade:0.2,time:30*1000};
+</script>
+<block name="baseScript"></block>
+<script>
+$('#search,#search1').click(function(event){
+  event.preventDefault();
+  event.stopPropagation();
+  $('#advancedSearch').slideUp(300);
+  XHRTable();
+});
+$('#WindowResize').click(function(){
+  resizeTable();
+});
+$(window).resize(function() {
+  resizeTable();
+});
+$('.updown').click(function(){
+    if($(this).hasClass('up')){
+        $('#advancedSearch').slideUp(700,function(){
+            $('.updown.down').show();
+        });
+    }else if($(this).hasClass('down')){
+        $('#advancedSearch').slideToggle(700,function(){
+          $('#advancedSearch').css('overflow','visible');          
+        });
+    }
+
+});
+$('a').focus(function(){
+  $(this).blur();
+});
+window.onload = function(){
+  XHRTable();
+}
+$('.quickSearch').keydown(function(e){
+  if(e.keyCode == 13){
+    XHRTable();
+  }
+});
+$('.quickTime').click(function(){
+  XHRTable($(this).data('time'));
+});
+$('.orderStatus').click(function(){
+  XHRTable(false,{action:$(this).data('action'),range:$(this).data('range')});
+});
+function getHeight($type){
+  var index = parent.layer.getFrameIndex(window.name);
+  var total = $( window.parent.document).find("#layui-layer" + index).css('height');
+  total = parseInt(total);
+  var toolbarHeight = parseInt($('#toolbar').css('height'));
+  var footerHeight = parseInt($('.layui-footer').css('height'));
+  var h = 0;
+  if($('#toolbar').css('display') == 'none'){
+    h = total;
+  }else{
+    h =  total - toolbarHeight;
+  } 
+  h = h-10;
+  return h
+}
+function resizeTable(){
+    var h = getHeight();
+    $('#DataTable').bootstrapTable('resetView', {
+        height: h
+    });       
+}
+function stFormatter(_value) {
+  return _value ? _value : '-';
+}
+function awbFormatter(_val){
+    return '<a style="display:block;width:100%;height:100%" onclick="showPage(this)" data-href="__ORDER__/PreOrder/orderTracker?awbno=' + _val + '" target="_blank">' + _val + '</a>';
+}
+function showPage(_link,name="订单轨迹"){
+    var index = layer.open({
+        type: 2,
+        title:'<b>'+$(_link).text()+'</b> '+name,
+        content: $(_link).data('href'),
+        area: ['100%', '100%']
+    });
+}
+</script>
+<block name="baseFunction"></block>
+</html>

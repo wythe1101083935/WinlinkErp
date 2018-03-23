@@ -1,0 +1,236 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item">
+        <a href="javascript:;">状态</a>
+        <dl class="layui-nav-child">
+          <dd class="batchStatus" data-status="0"><a href="javascript:;">全部</a></dd>
+          <dd class="batchStatus" data-status="2"><a href="javascript:;">完成</a></dd>
+          <dd class="batchStatus" data-status="1"><a href="javascript:;">进行中</a></dd>
+        </dl>
+      </li>      
+    </ul> 
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="discount" >打折</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="receivable">结算</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="updateBatch">更新批次</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+</block>
+<block name="baseFields">
+    <th class="check" data-checkbox="true"></th>
+    <th data-field="batch_id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+    <th data-field="batch_name" data-width="300" data-align="center" data-formatter="batchDetailFormatter">结算单</th>
+    <th data-field="batch_status" data-width="80" data-align="center" data-formatter="batchStatusFormatter">状态</th>
+    <th data-field="username" data-width="100" data-align="center">客户</th>
+    <th data-field="batch_total" data-width="100" data-align="center">折前总金额</th>
+    <th data-field="batch_total_tariff" data-width="100" data-align="center">关税总金额</th>
+    <th data-field="batch_discount" data-width="100" data-align="center">折扣</th>
+    <th data-field="batch_receivable" data-width="100" data-align="center">折后应收</th>
+    <th data-field="batch_receivable_already" data-width="100" data-align="center" data-formatter="alreadyFormatter">已收</th>
+    <th data-field="batch_debit" data-width="100" data-align="center" data-formatter="debitFormatter">欠款</th>
+    <th data-field="batch_unit" data-width="100" data-align="center">货币</th>
+    <th data-field="batch_create_time" data-width="100" data-align="center" data-formatter="timeFormatter">创建时间</th>
+    <th data-field="create_username" data-width="100" data-align="center">创建人</th>
+    <th data-field="batch_update_time" data-width="100" data-align="center" data-formatter="timeFormatter">更新时间</th>
+    <th data-field="update_username" data-width="100" data-align="center">更新人</th>
+    <th data-field="" data-width="100" data-align="center" data-formatter="billOrderFormatter">查看订单</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,$ = layui.jquery;
+    $('#receivable').click(function(){
+      var select = $('#DataTable').bootstrapTable('getSelections');
+      if(select.length <1){
+        layer.msg('尚未选择结算单！');
+        return;
+      }
+      if(select.length >1){
+        layer.msg('不能同时结算多个结算单！');
+        return;
+      }
+      layer.open({
+                  type:2,
+                  title:select[0].batch_name,
+                  content:'__FINANCIAL__/ReceivableBatch/addReceivable',
+                  btn:[top.Win10.lang('确认','Confirm'),top.Win10.lang('取消','Cancel')],
+                  area:['500px','300px'],
+                  btn1:function(index,layero){
+                      var FormValue = layero.find('iframe').contents().find('#deskForm').serializeArray();
+                      var value = {};
+                      for (var i = 0; i < FormValue.length; i++) {
+                        value[FormValue[i].name] = FormValue[i].value;
+                      }
+                      if(!value['receivable_account']){
+                        layer.msg('结算单金额不能为空！');
+                        return;
+                      }
+                      if(!value['receivable_bank']){
+                        layer.msg('收款账号不能为空！');
+                        return;                        
+                      }
+                      var number = /^[0-9]+.?[0-9]*$/;
+                      if(!number.test(value['receivable_account'])){
+                        layer.msg('结算金额只能为数字！');
+                        return;
+                      }
+                      $.ajax({
+                        url:'__FINANCIAL__/ReceivableBatch/receivable',
+                        type:'post',
+                        data:{
+                          batch_id:select[0].batch_id,
+                          receivable_account:value['receivable_account'],
+                          receivable_remark:value['receivable_remark'],
+                          receivable_bank:value['receivable_bank']
+                        },
+                        dataType:'json',
+                        success:function(res){
+                          layer.close(index);
+                          layer.msg(res.msg);
+                          if(res.status){
+                            XHRTable();
+                          }
+                        }
+                      }); 
+                  },
+                  btn2:function(index){
+                  }
+      });    
+    })
+    $('#updateBatch').click(function(){
+      var select = $('#DataTable').bootstrapTable('getSelections');
+      if(select.length < 0){
+        layer.msg('尚未选中批次!');
+        return;
+      }
+      if(select.length > 1){
+        layer.msg('一次只能更新一条！');
+        return;
+      }
+      $.ajax({
+        url:'__FINANCIAL__/ReceivableBatch/update',
+        type:'post',
+        async:true,
+        data:{batch_id:select[0].batch_id},
+        dataType:'json',
+        success:function(res){
+          layer.msg(res.msg);
+          if(res.status){
+            XHRTable();
+          }
+        }
+      });
+    });
+    $('#discount').click(function(){
+      var select = $('#DataTable').bootstrapTable('getSelections');
+      if(select.length <1){
+        layer.msg('尚未选择结算单！');
+        return;
+      }
+      if(select.length >1){
+        layer.msg('暂不能同时打折！');
+        return;
+      } 
+     var index =  layer.prompt({
+        formType: 2,
+        value: '',
+        title: '请输入折扣',
+        area: ['400px', '40px'] //自定义文本域宽高
+        }, function(value, index, elem){
+          var preg = /^0.[0-9]+$/;
+          if(!preg.test(value)){
+            layer.msg('折扣格式不正确!');
+            return;
+          }
+          $.ajax({
+            url:'__FINANCIAL__/ReceivableBatch/discount',
+            type:'post',
+            async:true,
+            data:{batch_id:select[0].batch_id,discount:value},
+            dataType:'json',
+            success:function(res){
+              layer.msg(res.msg);
+              if(res.status) XHRTable();
+              layer.close(index);
+            }
+          });
+      });   
+    })
+    $('.batchStatus').click(function(){
+      XHRTable($(this).data('status'));
+    });
+  
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+function batchDetailFormatter(_value,row,index){
+  return '<a onclick="showPage(this,\'结算详情\')" data-href="__FINANCIAL__/ReceivableBatch/indexReceivableDetail/batch_id/'+row.batch_id+'">'+_value+'</a>';
+}
+function billOrderFormatter(_value,row,index){
+  return '<a class="layui-btn layui-btn-xs" onclick="top.Win10.openUrl(\'__FINANCIAL__/ReceivableBatch/billOrder/batch_id/'+row.batch_id+'\',\''+row.batch_name+':对账详情'+'\')">'+'查看订单'+'</a>'
+}
+function batchStatusFormatter(_value){
+  return _value=="1" ? '<font style="color:#5FB878">完成</font>':'<font style="color:#FF5722">进行中</font>'
+}
+function debitFormatter(_value){
+  return _value>0 ? '<font style="color:#FF5722">'+_value+'</font>' : _value;
+}
+function alreadyFormatter(_value){
+  return _value ? _value : '0';
+}
+var indexLoad = '';
+function XHRTable($status=false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__FINANCIAL__/ReceivableBatch/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'batch_create_time',
+              };
+              if($status){
+                param.status = $status;
+              }
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

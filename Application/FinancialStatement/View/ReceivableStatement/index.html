@@ -1,0 +1,93 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <div class="layui-logo" style="color:white">2018年3月后应收报表</div>
+    <ul class="layui-nav layui-layout-left">
+      <li class="layui-nav-item" lay-unselect><a href="javascript:;" class="updown down" >总金额</a></li>
+    </ul> 
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>    
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseAdvancedSearch">
+  <table class="layui-table">
+     <tr><td>折前总金额:</td> <td id="total1"></td> <td>总确认应收:</td> <td id="total3"></td></tr>
+     <tr><td>折后总金额:</td> <td id="total2"></td> <td>已收:</td>       <td id="total4"></td></tr>
+     <tr><td>货币:</td>       <td style="font-weight: bold;">RMB</td>    <td>总欠款:</td> <td id="total5" style="color:#FF5722"></td></tr>
+  </table>
+</block>
+<block name="baseFields">
+    <th data-field="id" data-formatter="indexFormatter" data-width="40" data-align="center">序号</th>
+    <th data-field="username" data-align="center">客户名</th>
+    <th data-field="total_transer_fee" data-align="center">折前应收</th>
+    <th data-field="discountReceivable" data-align="center">折后应收</th>
+    <th data-field="unit" data-align="center">货币</th>
+    <th data-field="confirmReceivable" data-align="center">确认应收</th>
+    <th data-field="alreadyReceivable" data-align="center">已收</th>
+    <th data-field="arrearage" data-formatter="debitFormatter" data-align="center">欠款</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,$ = layui.jquery;
+
+  
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+function debitFormatter(_value){
+  return parseFloat(_value).toFixed(0)>0 ? '<font style="color:#FF5722">'+_value+'</font>' : '0';
+}
+var indexLoad = '';
+function XHRTable(){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__FINANCIALSTATEMENT__/ReceivableStatement/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 100, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'accountno',
+              };
+              return param;
+          },
+          onLoadSuccess:function(data){
+            $('#total1').text(data.totalMoney.totalTranserFee);
+            $('#total2').text(data.totalMoney.totalDiscountReceivable);
+            $('#total3').text(data.totalMoney.totalConfirmReceivable);
+            $('#total4').text(data.totalMoney.totalAlreadyReceivable);
+            $('#total5').text(data.totalMoney.totalDebit);
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

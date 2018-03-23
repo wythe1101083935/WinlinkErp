@@ -1,0 +1,26 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<div style="margin-right:10%;margin-top:30px;">
+	<form class="layui-form" id="deskForm">
+		<div class="layui-form-item">
+			<label class="layui-form-label">名称</label>
+			<div class="layui-input-block">			
+					<input type="text" name="desk_name" class="layui-input" placeholder="例:百度" />
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">网址</label>
+			<div class="layui-input-block">			
+					<input type="text" name="desk_url" class="layui-input" placeholder="例:http://www.baidu.com" />
+			</div>
+		</div>
+	</form>
+</div>
+</block>
+<block name="baseScript">
+<script>
+	layui.use(['form'],function(){
+		var form = layui.form;
+	});
+</script>
+</block>

@@ -1,0 +1,137 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="search1">查询</a></li>
+    </ul> 
+    <form class="layui-layout-left layui-form" style="padding:10px;left:320px;">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入单号" id="awbnos" class="layui-textarea quickSearch" style="min-height:40px;height:40px;max-height:40px;"></textarea>
+            </div>
+        </div>
+      </div>
+    </form>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="search" >查询</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">高级搜索</a></li>
+      <li class="layui-nav-item">
+        <a href="javascript:;">导出</a>
+        <dl class="layui-nav-child">
+          <dd class="exportExcel" data-type="excel" data-export="all"><a href="javascript:;">全部</a></dd>
+          <dd class="exportExcel" data-type="excel" data-export="page"><a href="javascript:;">本页</a></dd>
+          <!-- DEBUG<dd class="exportExcel" data-type="excel" data-export="selected"><a href="javascript:;">选中项<a></dd> -->
+        </dl>
+      </li>
+    </ul>  
+</block>
+<block name="baseFields">
+          <th class="check" data-checkbox="true"></th>
+          <th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+          <th data-field="refcode" data-width="110" data-align="center">REFERENCE<th>
+          <th data-field="awbno" data-width="110" data-align="center">FFCL AWBNO<th>
+          <th data-field="" data-width="100" data-formatter="accountFormatter" data-align="center">ACCOUNT<th>
+          <th data-field="shippername" data-width="100" data-align="center">Shipper COMPANY/NAME<th>
+          <th data-field="" data-width="100" data-align="center">ATTENTION<th>
+          <th data-field="" data-width="100" data-align="center">ADDRESS 1<th>
+          <th data-field="" data-width="100" data-align="center">ADDRESS 3<th>
+          <th data-field="" data-width="60" data-align="center" data-formatter="cityFormatter">CITY<th>
+          <th data-field="" data-width="100" data-align="center">STATE<th>
+          <th data-field="" data-width="100" data-align="center">POSTCODE/ZIP<th>
+          <th data-field="" data-width="100" data-align="center" data-formatter="countryFormatter">COUNTRY<th>
+          <th data-field="" data-width="100" data-align="center">TELEPHONE<th>
+          <th data-field="" data-width="100" data-align="center">FAX<th>
+          <th data-field="" data-width="100" data-align="center" data-formatter="countryCodeFormatter">Country Code<th>
+          <th data-field="consigneeName" data-width="90" data-align="center">Consginee COMPANY/NAME<th>
+          <th data-field="consigneename" data-width="90" data-align="center">ATTENTION<th>
+          <th data-field="consigneeaddress1" data-width="150" data-align="center">ADDRESS 1<th>
+          <th data-field="consigneeaddress2" data-width="150" data-align="center">ADDRESS 2<th>
+          <th data-field="consigneecity" data-width="50" data-align="center">ADDRESS 3<th>
+          <th data-field="consigneecity" data-width="50" data-align="center">CITY<th>
+          <th data-field="consigneecity" data-width="50" data-align="center">STATE<th>
+          <th data-field="" data-width="100" data-align="center">POSTCODE/ZIP<th>
+          <th data-field="" data-width="100" data-align="center">COUNTRY<th>
+          <th data-field="consigneecountry" data-width="60" data-align="center">Country Code<th>
+          <th data-field="consigneecity" data-width="60" data-align="center">City Code<th>
+          <th data-field="consigneetel" data-width="100" data-align="center">TELEPHONE<th>
+          <th data-field="consigneetel" data-width="100" data-align="center">Consignee Mobile<th>
+          <th data-field="consigneetel" data-width="100" data-align="center">FAX<th>
+          <th data-field="noofpieces" data-width="40" data-align="center">PIECES<th>
+          <th data-field="cweight" data-width="60" data-align="center">ACT WT<th>
+          <th data-field="" data-width="100" data-align="center">type<th>
+          <th data-field="ordername" data-width="150" data-align="center">Description<th>
+          <th data-field="value" data-width="120" data-align="center">SHPMT VALU<th>
+          <th data-field="inamt" data-width="80" data-align="center">COD Amount<th>
+         <!--  <th data-field="unit" data-width="" data-align="center">COD Currency<th> -->
+          <th data-field="billdate" data-width="120" data-align="center" data-formatter="timeFormatter">Shipping Date<th>
+          <th data-field="" data-width="100" data-align="center">Retail Code<th>
+          <th data-field="" data-width="100" data-align="center">Cusomer Reference<th>
+          <th data-field="shipperref" data-width="110" data-align="center">CustCode<th>
+          <th data-field="" data-width="100" data-align="center">ManifetsNo<th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#timeOut',type:'datetime',range:'~',theme:'#393D49'});
+    laydate.render({elem:'#timeFinish',type:'datetime',range:'~',theme:'#393D49'});
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+function accountFormatter(_value){
+  return '101312325';
+}
+function cityFormatter(_value){
+  return 'CZX';
+}
+function countryFormatter(_value){
+  return 'CHINA';
+}
+function countryCodeFormatter(_value){
+  return 'CN';
+}
+var indexLoad = '';
+function XHRTable(selectTime = false, status = false){
+      $("#DataTable").bootstrapTable('destroy').bootstrapTable({
+          method: "post", //使用post请求到服务器获取数据
+          url: "__ORDERFOLLOWUP__/SmsaManifest/XHRIndex", //获取数据的Servlet地址
+          height:getHeight(),
+          classes:'layui-table text-nowrap',
+          pagination: true, //启动分页
+          pageSize: 25, //每页显示的记录数
+          pageNumber: 1, //默认显示页
+          pageList: [25,50,100,200,1500], //记录数可选列表
+          search: false, //是否启用查询
+          showColumns: false, //显示下拉框勾选要显示的列
+          showRefresh: false, //显示刷新按钮
+          showExport:true,//显示是否可以导出(这里只做开启用)
+          sidePagination: "server", //表示服务端请求
+          //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+          //设置为limit可以获取limit, offset, search, sort, order
+          queryParamsType: "undefined",
+          queryParams: function queryParams(params) { //设置查询参数
+              indexLoad = layer.load(2,loadStyle);
+              var param = {
+                  pageNumber: params.pageNumber,
+                  pageSize: params.pageSize,
+                  sortOrder:params.sortOrder=='asc' ? 'desc' :'asc',
+                  sortName: params.sortName ? params.sortName:'billdate',
+                  awbno:$('#awbnos').val()
+              };
+              return param;
+          },
+          onLoadSuccess:function(){
+            layer.close(indexLoad);
+          }
+      });     
+}
+</script>
+</block>

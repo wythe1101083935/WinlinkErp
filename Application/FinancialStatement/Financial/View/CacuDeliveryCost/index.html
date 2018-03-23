@@ -1,0 +1,127 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" id="upload" title="也可以将文件拖入本窗口">选择文件</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="uploadV">上传</a></li>
+    </ul> 
+    <form class="layui-layout-left" style="padding:10px;left:230px;" id="drop">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入单号" id="awbno" class="layui-textarea" style="min-height:40px;height:40px;max-height:40px;"></textarea>
+            </div>
+            <div class="layui-input-inline">
+                   <input type="file" name="xlfile" id="xlf" style="opacity: 0;-ms-filter: 'alpha(opacity=0)';"/>
+            </div>
+        </div>
+      </div>
+    </form> 
+    <input type="file" name="xlfile" id="xlf" style="display:none;"/>
+</block>
+<block name="baseFields">
+    <th data-field="id" data-width="40" data-align="center" data-formatter="idFormatter">ID</th>
+    <th data-field="awbno" data-width="100"  data-align="center" data-formatter="awbFormatter">单号</th>
+    <th data-field="vl" data-align="center" data-width="70">长</th>
+    <th data-field="vw" data-align="center" data-width="70">宽</th>
+    <th data-field="vh" data-align="center" data-width="70">高</th>
+    <th data-field="vweight" data-align="center" data-width="70">体积重</th>
+    <th data-field="msg" data-align="left" data-width="200" data-formatter="msgFormatter" data-visible="false">返回信息</th>
+    <th data-field="status" data-align="center" data-width="70" data-visible="false" data-formatter="statusFormatter">状态</th>
+</block>
+<block name="baseScript">
+<script>
+var layer = '';
+var $total = 0;
+layui.use(['form','jquery','layedit','laydate','element'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#timeOut',type:'datetime',range:'~',theme:'#393D49'});
+    laydate.render({elem:'#timeFinish',type:'datetime',range:'~',theme:'#393D49'});
+    $('#awbno').keydown(function(e){
+      if(e.keyCode == 13){
+        $('#search').click();
+      }
+    });
+    $('#upload').click(function(){
+    	$('#xlf').click();
+    });
+    $('#uploadV').click(function(){
+	    var uploadData = JSON.parse(window.localStorage.getItem('upload_edit_cost'));
+	    if(Object.keys(uploadData).length==0){
+	        errorMsg("批量上传数据不能为空！");
+	        return; 
+	    }
+	    formContent = JSON.stringify(uploadData);
+	    $('#DataTable').bootstrapTable('removeAll');
+        hideColumn();  
+	    $('#uploadV').hide();
+	    for (var i = 0; i < uploadData.length; i++) {
+	        $.ajax({
+	            url:'__FINANCIAL__/CacuDeliveryCost/updateVolume'
+	            //url:'__STORE__/UploadVolume/test'
+	            ,type:'post'
+	            ,dataType:'json'
+	            ,async:true
+	            ,data:{data:uploadData[i]}
+	            ,success:function(res){
+					$('#DataTable').bootstrapTable('insertRow', {
+	                    index:$('#DataTable').bootstrapTable('getOptions').totalRows,
+	                    //row:{'awbno':123,'vl':12,'vw':2,'vh':3}
+	                    row:res
+	                });
+	                var h = $(document).height()-$(window).height();
+	                $(document).scrollTop(h); 
+	            }
+	        });
+	    }    
+        $total = i;	
+    });
+});
+</script>
+</block>
+<block name="baseFunction">
+<include file="./Public/view/uploadIndexTable.html" uploaddataname="upload_edit_cost" />
+<script>
+function hideColumn(){
+$('#DataTable').bootstrapTable('hideColumn','vl');
+$('#DataTable').bootstrapTable('hideColumn','vw');
+$('#DataTable').bootstrapTable('hideColumn','vh');    
+$('#DataTable').bootstrapTable('hideColumn','vweight');    
+$('#DataTable').bootstrapTable('showColumn','msg');    
+$('#DataTable').bootstrapTable('showColumn','status');  
+}
+function showColumn(){
+$('#DataTable').bootstrapTable('showColumn','vl');
+$('#DataTable').bootstrapTable('showColumn','vw');
+$('#DataTable').bootstrapTable('showColumn','vh');  
+$('#DataTable').bootstrapTable('showColumn','vweight');  
+$('#DataTable').bootstrapTable('hideColumn','msg');    
+$('#DataTable').bootstrapTable('hideColumn','status'); 
+}
+</script>
+<script>
+var indexLoad = '';
+var errorMsg = function (msg){
+    $("#DataTable").bootstrapTable('removeAll');
+    $(".no-records-found td").html("<p style='color:red;font-weight: bold;'>"+msg+"</p>");
+} 
+function XHRTable(){
+	indexLoad = layer.load(2,loadStyle);
+ 	$("#DataTable").bootstrapTable('destroy').bootstrapTable({
+            height: getHeight(),
+            pagination: true,
+            classes:'layui-table text-nowrap',
+            onResetView:function(){
+				layer.close(indexLoad);            	
+            },
+			formatNoMatches: function(){
+			   return '将文件拖入此处';
+			}
+ 	});	
+}
+</script>
+</block>

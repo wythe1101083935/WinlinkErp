@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css" media="all" />
+<link rel="stylesheet" href="__PUBLIC__/layui/css/single.css">
+  <script type="text/javascript" src="__PUBLIC__/layui/layui.js"></script>
+</head>
+<body>
+<fieldset class="layui-elem-field" style="width:60%;margin-left:20%;margin-right:20%">
+  <legend><block name="baseTitile"></block></legend>
+  <div class="layui-field-box" >
+      <form class="layui-form layui-form-pane">
+      <block name="baseForm"></block>
+      </form>
+  </div>
+</fieldset>
+</body>
+<script>
+  var loadStyle = {shade:0.2,time:10*1000}
+</script>
+<block name="baseScript"></block>
+</html>

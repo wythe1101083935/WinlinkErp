@@ -1,0 +1,143 @@
+<extend name="./Public/view/indexTable.html" />
+<block name="baseToolbar">
+    <ul class="layui-nav layui-layout-left" style="left:0px;">
+      <li class="layui-nav-item"><a href="javascript:;" class="updown down">输入订单信息</a></li>
+      <li class="layui-nav-item"><a href="javascript:;" id="updateTracker0" >推送</a></li>   
+      <li class="layui-nav-item"><a href="javascript:;" id="pushManifest" >推送Manifest</a></li>   
+    </ul>   
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item"><a href="javascript:;" id="responseDetail" >返回详情</a></li>      
+      <li class="layui-nav-item"><a href="javascript:;" id="clearInfo" >清空</a></li>      
+    </ul> 
+</block>
+<block name="baseAdvancedSearch">
+        <div class="layui-form-item">  
+            <div class="layui-inline">
+              <label class="layui-form-label" title="EventCode">EtCode</label> 
+              <div class="layui-input-inline">
+                <input class="layui-input layui-disabled" id="eventCode" disabled="" value="AS" type="text">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label" title="EventNote">EtNote</label>
+              <div class="layui-input-inline">
+                <input type="text" class="layui-input layui-disabled" disabled="" value="arrived at origin facility">
+              </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+              <label class="layui-form-label" title="RackNumber">RkNo</label>
+              <div class="layui-input-inline">
+                <input type="text" class="layui-input layui-disabled" disabled="" value="" placeholder="选项为空">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">Weight</label>
+              <div class="layui-input-inline">
+                <input type="text" class="layui-input layui-disabled" disabled="" value="0.00">
+              </div>
+            </div>          
+        </div>
+        <div class="layui-form-item layui-form-text">
+              <label class="layui-form-label">单号</label>
+              <div class="layui-input-block" style="margin-top:0px;">
+                  <textarea placeholder="请输入单号" id="awbnos" class="layui-textarea"></textarea>
+              </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+              <input type="button" class="layui-btn" id="updateTracker1" value="推送">
+              <input type="reset"  class="layui-btn" value="重置">
+            </div>
+        </div>
+</block>
+<block name="baseFields">
+  <th data-field="id" data-width="40" data-align="center" data-formatter="indexFormatter">ID</th>
+  <th data-field="awbno" data-align="center">单号</th>
+  <th data-field="status" data-formatter="statusFormatter" data-align="center">Status</th>
+  <th data-field="msg" data-align="center">Response</th>
+</block>
+<block name="baseScript">
+<script>
+Array.prototype.notempty = function(){
+    return this.filter(t => t!=undefined && t!==null && t!='');
+}
+var layer = '';
+layui.use(['form','jquery','layedit','laydate','element','code'],function(){
+    var form = layui.form
+    ,layer = layui.layer
+    ,element = layui.element
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate
+    ,$ = layui.jquery;
+    laydate.render({elem:'#trackerTime',type:'datetime',theme:'#393D49'});
+    $('#clearInfo').click(function(){
+      $('#DataTable').bootstrapTable('removeAll');
+    });
+    $('#updateTracker0,#updateTracker1').click(function(){
+      $('#advancedSearch').slideUp(300);
+      var $awbnos = $('#awbnos').val();
+      var index = layer.load(2,loadStyle);;
+      $.ajax({
+        url:'__TRACKER__/PostaTrackerUpload/createShipmentStatus',
+        type:'post',
+        async:true,
+        dataType:'json',
+        data:{awbnos:$('#awbnos').val()},
+        success:function(res){
+          window.localStorage.responseDetailCode  = JSON.stringify(res.code,null,4);
+          layer.close(index);
+          if(res.status){
+            XHRTable(res.data);
+          }else{
+            layer.msg(res.msg);
+          }
+        }
+      });
+    });
+    $('#pushManifest').click(function(){
+      parent.Win10.openUrl('__TRACKER__/PostaTrackerUpload/indexManifest','推送manifest');
+    });
+    $('#responseDetail').click(function(){
+      if(!window.localStorage.responseDetailCode){
+        layer.msg('没有返回代码！');
+        return ;
+      }
+      var msg = window.localStorage.responseDetailCode;
+      msg.replace(/\n/g, '<br>').replace(/\s/g, ' ');  
+      layer.open({
+        type:1,
+        area:['100%','100%'],
+        content:'<pre class="layui-code" lay-title="" lay-height="" lay-skin="" lay-encode="">'+msg+'</pre>'
+      })
+    });
+});
+</script>
+</block>
+<block name="baseFunction">
+<script>
+var indexLoad = '';
+function statusFormatter(_value){
+  return _value ? '<font class="text-success">成功！</font>':'<font style="color:#FF5722;">失败！</font>'
+}
+function XHRTable($data=false){
+  indexLoad = layer.load(2,loadStyle);
+  var initParam = {
+            height: getHeight(),
+            pagination: true,
+            pageList: [25,50,100], 
+            onResetView:function(){
+              layer.close(indexLoad);             
+            },
+            formatNoMatches: function(){
+               return '输入订单号后推送';
+            }
+  };
+  if($data){
+    initParam.data = $data;
+  }
+  $("#DataTable").bootstrapTable('destroy').bootstrapTable(initParam);
+}
+</script>
+</block>

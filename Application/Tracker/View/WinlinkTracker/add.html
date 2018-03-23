@@ -1,0 +1,38 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<div style="margin-right:10%;margin-top:30px;">
+	<form class="layui-form" id="DataForm">
+		<div class="layui-form-item">
+			<label class="layui-form-label">名称</label>
+			<div class="layui-input-block">			
+					<input type="text" name="names" class="layui-input" placeholder="请输入名称" />
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">代码</label>
+			<div class="layui-input-block">			
+					<input type="text" name="code" class="layui-input" placeholder="请输入代码" />
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">说明</label>
+			<div class="layui-input-block">			
+					<input type="text" name="remarks" class="layui-input" placeholder="请输入说明" />
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">所在城市</label>
+			<div class="layui-input-block">			
+					<input type="text" name="city" class="layui-input" placeholder="请输入所在城市" />
+			</div>
+		</div>
+	</form>
+</div>
+</block>
+<block name="baseScript">
+<script>
+	layui.use(['form'],function(){
+		var form = layui.form;
+	});
+</script>
+</block>

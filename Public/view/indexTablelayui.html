@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>winlink</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css"  media="all">
+<link rel="stylesheet" href="__PUBLIC__/layui/css/single.css">
+  <script src="__PUBLIC__/layui/layui.js"></script>
+<style>
+  .layui-table, .layui-table-view {
+    margin: 0px 0;
+}
+</style>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header" style="background-color:rgba(49, 49, 50, 0.94);" id="toolbar">
+    <block name="baseToolbar"></block>
+  </div> 
+<div style="padding:0px;left:0px;" id="DataBody">
+   <table class="layui-hide" id="DataTable" lay-filter="DataTable"></table>    
+</div>
+</div>
+</div>
+</div>
+</body>
+<script>
+  var loadStyle = {shade:0.2,time:10*1000};
+</script>
+<block name="baseScript"></block>
+<block name="baseFunction"></block>
+</html>

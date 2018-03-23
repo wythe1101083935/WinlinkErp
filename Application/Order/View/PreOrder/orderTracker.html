@@ -1,0 +1,76 @@
+<extend name="./Public/view/layui.html" />
+<block name="baseDiv">
+<style>
+    .layui-text ul li{
+        list-style-type:none;
+    }
+    .orderBy{
+        color:#5FB878;
+    }
+    .orderBy:hover{
+        cursor:pointer;
+        color:#FF5722;
+    }
+</style>
+<div style="margin-left:15%;margin-top:30px;margin-right:15%;display:none" id="trackerBody">
+
+    <ul class="layui-timeline">
+      <li class="layui-timeline-item">
+        <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+        <div class="layui-timeline-content layui-text">
+          <div class="layui-timeline-title">{$order[0]} <span style="float:right;" class="orderBy" data-order="{$order[3]}"><i class="layui-icon">&#xe647;</i></span></div>
+        </div>
+      </li> 
+      <foreach name="tracker" item="val">
+          <li class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+            <div class="layui-timeline-content layui-text">
+              <h3 class="layui-timeline-title">{$val.date}</h3>
+              <div>
+                <ul class="layui-timeline">
+                    <foreach name="val.detail" item="v">
+                      <li class="layui-timeline-item">
+                        <i class="layui-icon layui-timeline-axis">{$order[2]}</i>
+                        <div class="layui-timeline-content layui-text">
+                          <div class="layui-timeline-title" <eq name="v.exception" value="1">style="color:#FF5722"</eq>>
+                            <span style="font-weight:bold;">{$v.time}</span><span style="float:right">{$v.location}</span>
+                            <p>
+                                <span>Action：</span><span>{$v.remarks|default="Received"}</span> 
+                            </p>
+                            <p>
+                                <span>RECEIVER：</span><span style="color:#5FB878;font-weight:bold;">{$v.delivered_to}</span>
+                            </p>
+                            <p>
+                                <span>CODE：</span><span>{$v.status|default=""}</span> 
+                            </p>                            
+                        </div>
+                      </li>
+                    </foreach>
+                </ul>               
+              </div>
+            </div>
+          </li>    
+      </foreach>
+      <li class="layui-timeline-item">
+        <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+        <div class="layui-timeline-content layui-text">
+          <div class="layui-timeline-title">{$order[1]}</div>
+        </div>
+      </li> 
+    </ul>
+</div>
+</block>
+<block name="baseScript">
+<script>
+layui.use(['jquery'],function(){
+    var awbno = '{$Think.get.awbno}';
+    var $ = layui.jquery;
+    $('.orderBy').click(function(){
+        window.location.href = '__ORDER__/PreOrder/orderTracker/awbno/'+awbno+'/order/'+$(this).data('order');
+    });
+    window.onload = function(){
+        $('#trackerBody').slideDown(400);
+    }
+});
+</script>
+</block>
